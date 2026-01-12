@@ -2,7 +2,23 @@
 
 This repository contains a technical addon that exposes a OTLP endpoint for consumption of logs, traces and metrics.
 
+
+# Usage
+
+## Installation
+
+Add the .tgz file to your Splunk apps by following these instructions: [Install an add-on in a single-instance Splunk Enterprise deployment
+](https://docs.splunk.com/Documentation/AddOns/released/Overview/Singleserverinstall)
+
 ## Configuration
+
+Create a new OTLP input in the data inputs.
+
+![Picker](docs/data_input_picker.png)
+
+Configure the OTLP input ports, network interface and index.
+
+![Setup](docs/data_input_setup.webp)
 
 The input is configured as a data input in the Splunk Data Input settings.
 
