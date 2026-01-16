@@ -51,6 +51,10 @@ test-all:
 	$(MAKE) for-all-target TARGET="test"
 	$(MAKE) test
 
+.PHONY: benchmark-all
+benchmark-all:
+	$(MAKE) for-all-target TARGET="benchmark"
+
 .PHONY: gotidy
 gotidy:
 	@for mod in $$(find . -name go.mod | xargs dirname); do \

@@ -31,6 +31,8 @@ jobs:
         run: make tgz
       - name: Tests
         run: make test-all
+      - name: Benchmarks
+        run: make benchmark-all
 
   coverage:
     name: coverage

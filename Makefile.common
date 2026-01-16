@@ -40,3 +40,7 @@ test-with-codecov:
 	$(GOTEST) $(GOTEST_OPT_WITHOUT_RACE) ./... $(COVER_TESTING_OPTS)
 
 endif
+
+.PHONY: benchmark
+benchmark:
+	$(GOTEST) -bench=./...

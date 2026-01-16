@@ -16,6 +16,9 @@ import (
 	"testing"
 	"time"
 
+	"go.opentelemetry.io/collector/pdata/plog"
+	"go.opentelemetry.io/collector/pdata/pmetric"
+	"go.opentelemetry.io/collector/pdata/ptrace"
 	"gopkg.in/yaml.v3"
 )
 
@@ -25,6 +28,15 @@ const (
 	DefaultSourceLabel     = "com.splunk.source"
 	DefaultIndexLabel      = "com.splunk.index"
 	DefaultNameLabel       = "otel.log.name"
+)
+
+// TelemetryType represents supported telemetry signals.
+type TelemetryType string
+
+const (
+	TelemetryTypeMetrics TelemetryType = "metrics"
+	TelemetryTypeTraces  TelemetryType = "traces"
+	TelemetryTypeLogs    TelemetryType = "logs"
 )
 
 type IntegrationTestsConfig struct {
@@ -65,6 +77,51 @@ func GetConfigVariable(configPath, key string) (string, error) {
 		fmt.Println("Invalid field")
 		return "None", fmt.Errorf("Invalid field %v", key)
 	}
+}
+
+func LoadLogsFromFile(tb testing.TB, path string) plog.Logs {
+	tb.Helper()
+
+	data, err := os.ReadFile(filepath.Clean(path))
+	if err != nil {
+		tb.Fatalf("failed to read logs fixture: %v", err)
+	}
+	unmarshaler := plog.JSONUnmarshaler{}
+	logs, err := unmarshaler.UnmarshalLogs(data)
+	if err != nil {
+		tb.Fatalf("failed to unmarshal logs fixture: %v", err)
+	}
+	return logs
+}
+
+func LoadMetricsFromFile(tb testing.TB, path string) pmetric.Metrics {
+	tb.Helper()
+
+	data, err := os.ReadFile(filepath.Clean(path))
+	if err != nil {
+		tb.Fatalf("failed to read metrics fixture: %v", err)
+	}
+	unmarshaler := pmetric.JSONUnmarshaler{}
+	metrics, err := unmarshaler.UnmarshalMetrics(data)
+	if err != nil {
+		tb.Fatalf("failed to unmarshal metrics fixture: %v", err)
+	}
+	return metrics
+}
+
+func LoadTracesFromFile(tb testing.TB, path string) ptrace.Traces {
+	tb.Helper()
+
+	data, err := os.ReadFile(filepath.Clean(path))
+	if err != nil {
+		tb.Fatalf("failed to read traces fixture: %v", err)
+	}
+	unmarshaler := ptrace.JSONUnmarshaler{}
+	traces, err := unmarshaler.UnmarshalTraces(data)
+	if err != nil {
+		tb.Fatalf("failed to unmarshal traces fixture: %v", err)
+	}
+	return traces
 }
 
 // WriteToStdin pipes the provided content into os.Stdin and returns a restore function.
