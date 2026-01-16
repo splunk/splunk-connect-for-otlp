@@ -29,12 +29,13 @@ splunk: splunk-connect-for-otlp.tgz
 	docker run --rm -it -v $(PWD)/splunk-connect-for-otlp.tgz:/tmp/splunk-connect-for-otlp.tgz \
 		-e "SPLUNK_PASSWORD=changeme" \
 		-e "SPLUNK_APPS_URL=file:///tmp/splunk-connect-for-otlp.tgz" \
+		-e "SPLUNK_GENERAL_TERMS=--accept-sgt-current-at-splunk-com" \
 		-e "SPLUNK_START_ARGS=--accept-license" \
 		-e "SPLUNK_HEC_TOKEN=000000-0000-00000-0000000000" \
 		-p 4317:4317 \
 		-p 4318:4318 \
 		-p 8000:8000 \
-		splunk/splunk:9.3
+		splunk/splunk:10.0
 
 # Define a delegation target for each module
 .PHONY: $(ALL_MODS)
