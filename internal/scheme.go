@@ -8,7 +8,7 @@ const Scheme = `
 <scheme>
     <title>OTLP Input</title>
     <description>Receive data from OTLP</description>
-    <streaming_mode>simple</streaming_mode>
+    <streaming_mode>xml</streaming_mode>
     <use_single_instance>false</use_single_instance>
     <endpoint>
         <args>

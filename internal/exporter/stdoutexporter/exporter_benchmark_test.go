@@ -20,7 +20,7 @@ import (
 var testDataDir = "../../../cmd/splunk-connect-for-otlp/testdata"
 
 func BenchmarkStdoutExporter(b *testing.B) {
-	stdoutWriter = func([]byte) error { return nil }
+	stdoutWriter = func([]byte) (int, error) { return 0, nil }
 
 	settings := exportertest.NewNopSettings(exportertest.NopType)
 	cfg := createDefaultConfig().(*Config)

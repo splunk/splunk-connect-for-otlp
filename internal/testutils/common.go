@@ -208,6 +208,47 @@ func CaptureStdoutLines(t *testing.T) (<-chan string, func()) {
 	}
 }
 
+// CaptureStdoutXML returns a channel streaming stdout streaming XML and a restore function.
+func CaptureStdoutXML(t *testing.T) (<-chan string, func()) {
+	t.Helper()
+
+	original := os.Stdout
+	r, w, err := os.Pipe()
+	if err != nil {
+		t.Fatalf("failed to create stdout pipe: %v", err)
+	}
+	os.Stdout = w
+
+	lines := make(chan string, 50)
+	go func() {
+		scanner := bufio.NewScanner(r)
+		scanner.Split(func(data []byte, atEOF bool) (advance int, token []byte, err error) {
+			if atEOF && len(data) == 0 {
+				return 0, nil, nil
+			}
+			if i := bytes.Index(data, []byte("</stream>")); i >= 0 {
+				return i + 9, data[0 : i+9], nil
+			}
+			if atEOF {
+				return len(data), data, nil
+			}
+			return 0, nil, nil
+		})
+		buf := make([]byte, 0, 64*1024)
+		scanner.Buffer(buf, 10*1024*1024)
+		for scanner.Scan() {
+			lines <- scanner.Text()
+		}
+		close(lines)
+		_ = r.Close()
+	}()
+
+	return lines, func() {
+		os.Stdout = original
+		_ = w.Close()
+	}
+}
+
 func GetFreePort(t *testing.T) int {
 	t.Helper()
 
@@ -271,7 +312,7 @@ func CollectLines(t *testing.T, ch <-chan string, expectedCount int) []string {
 	return lines
 }
 
-func LoadExpectedHecData(t *testing.T, path string) []byte {
+func LoadExpectedData(t *testing.T, path string) []byte {
 	t.Helper()
 
 	data, err := os.ReadFile(filepath.Clean(path))

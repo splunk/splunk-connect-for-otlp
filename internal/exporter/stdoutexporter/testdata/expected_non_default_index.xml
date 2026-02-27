@@ -1,0 +1,1 @@
+<stream><event><data>This is my new event! And some number 101</data><host>myhost</host><index>sck-otel</index><source>otel-source</source><sourcetype>sck-otel-st</sourcetype></event></stream>

@@ -123,7 +123,7 @@ func logsTest(t *testing.T, test testCfg) {
 	require.NoError(t, err, "Must not error while sending log data")
 	expectedJson, err := os.ReadFile(test.expectedResultFilePath)
 	require.NoError(t, err)
-	require.Equal(t, out, string(expectedJson))
+	require.Equal(t, string(expectedJson), out)
 }
 
 func metricsTest(t *testing.T, test testCfg) {
@@ -182,7 +182,7 @@ func TestSplunkHecExporter(t *testing.T) {
 			},
 			startTime:              "-3h@h",
 			telType:                logsType,
-			expectedResultFilePath: "./testdata/expected_hec_log.json",
+			expectedResultFilePath: "./testdata/expected.xml",
 		},
 		{
 			name: "Events to Splunk - Non default index",
@@ -194,7 +194,7 @@ func TestSplunkHecExporter(t *testing.T) {
 			},
 			startTime:              "-1m@m",
 			telType:                logsType,
-			expectedResultFilePath: "./testdata/expected_hec_log_non_default_index.json",
+			expectedResultFilePath: "./testdata/expected_non_default_index.xml",
 		},
 		{
 			name: "Events to Splunk - metrics",

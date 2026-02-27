@@ -60,7 +60,7 @@ func TestRunStartsAndStopsOnSignal(t *testing.T) {
 	}
 }
 
-func TestExpectedHEC(t *testing.T) {
+func TestExpected(t *testing.T) {
 	tests := []struct {
 		name         string
 		otlpendpoint string
@@ -83,7 +83,7 @@ func TestExpectedHEC(t *testing.T) {
 			name:         "logs",
 			otlpendpoint: "/v1/logs",
 			inputPath:    filepath.Join("testdata", "otlp_logs.json"),
-			expectedPath: filepath.Join("testdata", "expected_hec_logs.json"),
+			expectedPath: filepath.Join("testdata", "expected_logs.xml"),
 		},
 		{
 			name:         "large file metrics",
@@ -101,7 +101,7 @@ func TestExpectedHEC(t *testing.T) {
 			name:         "large file logs",
 			otlpendpoint: "/v1/logs",
 			inputPath:    filepath.Join("testdata", "otlp_logs_big.json"),
-			expectedPath: filepath.Join("testdata", "expected_hec_logs_big.json"),
+			expectedPath: filepath.Join("testdata", "expected_logs_big.xml"),
 		},
 	}
 
@@ -116,7 +116,15 @@ func TestExpectedHEC(t *testing.T) {
 			restoreStdin := testutils.WriteToStdin(t, config)
 			t.Cleanup(restoreStdin)
 
-			stdoutLines, restoreStdout := testutils.CaptureStdoutLines(t)
+			var stdoutLines <-chan string
+			var restoreStdout func()
+
+			if strings.HasSuffix(tt.expectedPath, ".xml") {
+				stdoutLines, restoreStdout = testutils.CaptureStdoutXML(t)
+			} else {
+				stdoutLines, restoreStdout = testutils.CaptureStdoutLines(t)
+			}
+
 			t.Cleanup(restoreStdout)
 
 			runDone := make(chan error, 1)
@@ -127,7 +135,7 @@ func TestExpectedHEC(t *testing.T) {
 			payload, err := os.ReadFile(tt.inputPath)
 			require.NoError(t, err)
 
-			expected := testutils.LoadExpectedHecData(t, tt.expectedPath)
+			expected := testutils.LoadExpectedData(t, tt.expectedPath)
 			expectedLines := strings.Split(strings.TrimSpace(string(expected)), "\n")
 			require.NotEmpty(t, expectedLines, "%s must contain fixture data", tt.expectedPath)
 
