@@ -4,7 +4,7 @@ receivers:
 
 exporters:
     otlphttp:
-      endpoint: "https://splunk:8088/services/collector" # replace splunk with the host name
+      endpoint: "http://splunk:4318"
 
 processors:
     batch:
