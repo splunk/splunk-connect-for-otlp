@@ -17,3 +17,20 @@ services:
     volumes:
       - ./otel-collector-config.yml:/etc/otel-collector-config.yml
       - ./output:/output
+  # Splunk instance
+  splunk:
+    image: splunk/splunk:9.3
+    profiles:
+      - splunk
+    container_name: splunk
+    environment:
+      - SPLUNK_START_ARGS=--accept-license
+      - SPLUNK_HEC_TOKEN=00000000-0000-0000-0000-0000000000000
+      - SPLUNK_PASSWORD=changeme
+    ports:
+      - 18000:8000
+    healthcheck:
+      test: [ 'CMD', 'curl', '-f', 'http://localhost:8000' ]
+      interval: 5s
+      timeout: 5s
+      retries: 20
