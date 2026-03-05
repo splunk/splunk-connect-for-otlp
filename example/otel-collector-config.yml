@@ -7,11 +7,18 @@ exporters:
       endpoint: "http://splunk:4318"
 
 processors:
-    batch:
+    resource:
+        attributes:
+          - key: com.splunk.sourcetype
+            value: "mysourcetype"
+            action: insert
+          - key: com.splunk.source
+            value: "mysource"
+            action: insert
 
 service:
     pipelines:
       logs:
         receivers: [filelog]
-        processors: [batch]
+        processors: [resource]
         exporters: [otlphttp]

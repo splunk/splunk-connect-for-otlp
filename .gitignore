@@ -8,3 +8,6 @@ ta/splunk-connect-for-otlp/windows_x86_64/bin/splunk-connect-for-otlp
 
 # Mac system files
 .DS_Store
+
+# Shared folder for logging example
+example/output/
