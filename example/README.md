@@ -8,7 +8,7 @@ Splunk is configured to receive data from the OpenTelemetry Collector using the 
 
 To deploy the example, check out this git repository, open a terminal and in this directory type:
 ```bash
-$> docker-compose up
+$> docker-compose --profile splunk up
 ```
 
 Splunk will become available on port 18000. You can login on [http://localhost:18000](http://localhost:18000) with `admin` and `changeme`.
