@@ -7,5 +7,5 @@ Steps:
 2. Commit the change
 3. Create a release tag `vx.x.x`
 4. Push the tag
-5. Make the addon `make tgz`
-6. Create the github release, add splunk-connect-for-otlp.tgz file to the release artifacts.
+5. Wait for the build to finish. A release will be created with the release artifacts.
+6. Update release notes
