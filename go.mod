@@ -8,7 +8,7 @@ require (
 	github.com/stretchr/testify v1.11.1
 	go.opentelemetry.io/collector/component v1.52.0
 	go.opentelemetry.io/collector/component/componentstatus v0.146.1
-	go.opentelemetry.io/collector/confmap v1.52.0
+	go.opentelemetry.io/collector/confmap v1.53.0
 	go.opentelemetry.io/collector/exporter v1.52.0
 	go.opentelemetry.io/collector/pdata v1.52.0
 	go.opentelemetry.io/collector/receiver v1.52.0
@@ -71,7 +71,7 @@ require (
 	go.opentelemetry.io/collector/extension/extensionauth v1.52.0 // indirect
 	go.opentelemetry.io/collector/extension/extensionmiddleware v0.146.1 // indirect
 	go.opentelemetry.io/collector/extension/xextension v0.146.1 // indirect
-	go.opentelemetry.io/collector/featuregate v1.52.0 // indirect
+	go.opentelemetry.io/collector/featuregate v1.53.0 // indirect
 	go.opentelemetry.io/collector/internal/componentalias v0.146.1 // indirect
 	go.opentelemetry.io/collector/internal/sharedcomponent v0.146.1 // indirect
 	go.opentelemetry.io/collector/internal/telemetry v0.146.1 // indirect
