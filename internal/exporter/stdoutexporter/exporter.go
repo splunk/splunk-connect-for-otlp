@@ -60,6 +60,9 @@ func newMetricsExporter(ctx context.Context, set exporter.Settings, cfg componen
 
 type stdoutExporter struct {
 	TelemetrySettings component.TelemetrySettings
+	index             string
+	source            string
+	sourcetype        string
 }
 
 func (se *stdoutExporter) ConsumeLogs(_ context.Context, ld plog.Logs) error {
@@ -74,7 +77,7 @@ func (se *stdoutExporter) ConsumeLogs(_ context.Context, ld plog.Logs) error {
 			sl := rl.ScopeLogs().At(j)
 			for k := 0; k < sl.LogRecords().Len(); k++ {
 				logRecord := sl.LogRecords().At(k)
-				event := translator.LogToSplunkEvent(r, logRecord, toOtelAttrs, toHecAttrs, "", "", "")
+				event := translator.LogToSplunkEvent(r, logRecord, toOtelAttrs, toHecAttrs, se.source, se.sourcetype, se.index)
 				if event == nil {
 					continue
 				}
@@ -103,7 +106,7 @@ func (se *stdoutExporter) ConsumeTraces(_ context.Context, td ptrace.Traces) err
 			ss := rs.ScopeSpans().At(j)
 			for k := 0; k < ss.Spans().Len(); k++ {
 				span := ss.Spans().At(k)
-				b, err := json.Marshal(translator.SpanToSplunkEvent(r, span, toOtelAttrs, "", "", ""))
+				b, err := json.Marshal(translator.SpanToSplunkEvent(r, span, toOtelAttrs, se.source, se.sourcetype, se.index))
 				if err != nil {
 					errs = append(errs, err)
 				} else {
@@ -128,7 +131,7 @@ func (se *stdoutExporter) ConsumeMetrics(_ context.Context, md pmetric.Metrics) 
 			sm := rm.ScopeMetrics().At(j)
 			for k := 0; k < sm.Metrics().Len(); k++ {
 				m := sm.Metrics().At(k)
-				for _, result := range translator.MetricToSplunkEvent(r, m, se.TelemetrySettings.Logger, toOtelAttrs, "", "", "") {
+				for _, result := range translator.MetricToSplunkEvent(r, m, se.TelemetrySettings.Logger, toOtelAttrs, se.source, se.sourcetype, se.index) {
 					b, err := json.Marshal(result)
 					if err != nil {
 						errs = append(errs, err)

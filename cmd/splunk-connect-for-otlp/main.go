@@ -67,8 +67,12 @@ func run() error {
 		Resource:       pcommon.NewResource(),
 	}
 
-	grpcPort, httpPort, listeningAddress := config.Extract()
+	grpcPort, httpPort, listeningAddress, index, source, sourcetype := config.Extract()
 	stdoutCfg := stdoutexporter.NewFactory().CreateDefaultConfig().(*stdoutexporter.Config)
+	stdoutCfg.Index = index
+	stdoutCfg.Source = source
+	stdoutCfg.Sourcetype = sourcetype
+
 	f := stdoutexporter.NewFactory()
 	ctx := context.Background()
 	telemetrySettings := exporter.Settings{
