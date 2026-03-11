@@ -42,8 +42,7 @@
         </element>
 
         <element name="indexField" type="fieldset">
-            <key name="legend">Index</key>
-            <key name="helpText">Set the destination index for this source.</key>
+            <key name="legend">Configuration</key>
             <view name="list"/>
             <view name="edit"/>
             <view name="create"/>
@@ -62,6 +61,21 @@
                             <key name="datatype">'all'</key>
                         </key>
                     </key>
+                    <key name="helpText">Default index</key>
+                </element>
+                <element name="source" label="Source">
+                    <view name="list"/>
+                    <view name="edit"/>
+                    <view name="create"/>
+                    <key name="exampleText">/var/log/syslog</key>
+                    <key name="helpText">Default source</key>
+                </element>
+                <element name="sourcetype" label="Source Type">
+                    <view name="list"/>
+                    <view name="edit"/>
+                    <view name="create"/>
+                    <key name="exampleText">_json</key>
+                    <key name="helpText">Default source type</key>
                 </element>
             </elements>
         </element>
