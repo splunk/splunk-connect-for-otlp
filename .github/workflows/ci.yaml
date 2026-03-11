@@ -101,3 +101,22 @@ jobs:
           verbose: true
         env:
           CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
+
+  publish-stable:
+    runs-on: ubuntu-24.04
+    if: startsWith(github.ref, 'refs/tags/') && github.repository == 'splunk/splunk-connect-for-otlp'
+    needs: test
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      - name: Package
+        run: make tgz
+
+      - name: Release
+        uses: softprops/action-gh-release@a06a81a03ee405af7f2048a818ed3f03bbf83c7b # v2.5.0
+        with:
+          fail_on_unmatched_files: true
+          files: |
+            *.tgz
