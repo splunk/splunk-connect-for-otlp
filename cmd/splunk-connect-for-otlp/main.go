@@ -11,10 +11,11 @@ import (
 	"os"
 	"runtime/debug"
 
+	"github.com/splunk/otlp2splunk/internal/auth"
+
 	"github.com/splunk/otlp2splunk/internal"
 	"github.com/splunk/otlp2splunk/internal/exporter/stdoutexporter"
 	"go.opentelemetry.io/collector/component"
-	"go.opentelemetry.io/collector/confmap"
 	"go.opentelemetry.io/collector/exporter"
 	"go.opentelemetry.io/collector/pdata/pcommon"
 	"go.opentelemetry.io/collector/receiver"
@@ -67,7 +68,7 @@ func run() error {
 		Resource:       pcommon.NewResource(),
 	}
 
-	grpcPort, httpPort, listeningAddress, index, source, sourcetype := config.Extract()
+	grpcPort, httpPort, listeningAddress, index, source, sourcetype, serverURI, sessionKey := config.Extract()
 	stdoutCfg := stdoutexporter.NewFactory().CreateDefaultConfig().(*stdoutexporter.Config)
 	stdoutCfg.Index = index
 	stdoutCfg.Source = source
@@ -95,34 +96,38 @@ func run() error {
 
 	rf := otlpreceiver.NewFactory()
 	cfg := rf.CreateDefaultConfig().(*otlpreceiver.Config)
-	_ = cfg.GRPC.Unmarshal(confmap.NewFromStringMap(map[string]any{"endpoint": fmt.Sprintf("%s:%d", listeningAddress, grpcPort)}))
-	_ = cfg.HTTP.Unmarshal(confmap.NewFromStringMap(map[string]any{"endpoint": fmt.Sprintf("%s:%d", listeningAddress, httpPort)}))
+	cfg.GRPC.GetOrInsertDefault().NetAddr.Endpoint = fmt.Sprintf("%s:%d", listeningAddress, grpcPort)
+	cfg.HTTP.GetOrInsertDefault().ServerConfig.NetAddr.Endpoint = fmt.Sprintf("%s:%d", listeningAddress, httpPort)
+	cfg.GRPC.Get().Auth.GetOrInsertDefault().AuthenticatorID = component.MustNewID("token")
+	cfg.HTTP.Get().ServerConfig.Auth.GetOrInsertDefault().AuthenticatorID = component.MustNewID("token")
 
-	if _, err = rf.CreateLogs(ctx, receiver.Settings{
+	otlpSettings := receiver.Settings{
 		TelemetrySettings: settings,
 		ID:                component.MustNewID("otlp"),
-	}, cfg, le); err != nil {
+	}
+	if _, err = rf.CreateLogs(ctx, otlpSettings, cfg, le); err != nil {
 		return err
 	}
-	if _, err = rf.CreateMetrics(ctx, receiver.Settings{
-		TelemetrySettings: settings,
-		ID:                component.MustNewID("otlp"),
-	}, cfg, me); err != nil {
+	if _, err = rf.CreateMetrics(ctx, otlpSettings, cfg, me); err != nil {
 		return err
 	}
-	r, err := rf.CreateTraces(ctx, receiver.Settings{
-		TelemetrySettings: settings,
-		ID:                component.MustNewID("otlp"),
-	}, cfg, te)
+	r, err := rf.CreateTraces(ctx, otlpSettings, cfg, te)
 	if err != nil {
 		return err
 	}
 
 	logger.Info("Configured OTLP receiver")
 
+	auth, err := auth.New(ctx, settings, serverURI, sessionKey)
+	if err != nil {
+		return err
+	}
+
 	h := &internal.TTYHost{
-		ErrStatus:  make(chan error, 1),
-		Extensions: map[component.ID]component.Component{},
+		ErrStatus: make(chan error, 1),
+		Extensions: map[component.ID]component.Component{
+			component.MustNewID("token"): auth,
+		},
 	}
 	h.Start()
 

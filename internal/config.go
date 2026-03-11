@@ -17,6 +17,8 @@ const (
 )
 
 type XMLInput struct {
+	ServerURI     string    `xml:"server_uri"`
+	SessionKey    string    `xml:"session_key"`
 	Configuration XMLConfig `xml:"configuration"`
 }
 
@@ -35,13 +37,16 @@ type XMLParam struct {
 	Value string `xml:",innerxml"`
 }
 
-func (x XMLInput) Extract() (int, int, string, string, string, string) {
+func (x XMLInput) Extract() (int, int, string, string, string, string, string, string) {
 	grpcPort := DefaultGrpcPort
 	httpPort := DefaultHTTPPort
 	listeningAddress := DefaultListenAddress
 	index := ""
 	source := ""
 	sourcetype := ""
+
+	serverURI := x.ServerURI
+	sessionKey := x.SessionKey
 
 	for _, p := range x.Configuration.Stanza.Params {
 		switch p.Name {
@@ -60,7 +65,7 @@ func (x XMLInput) Extract() (int, int, string, string, string, string) {
 		}
 	}
 
-	return grpcPort, httpPort, listeningAddress, index, source, sourcetype
+	return grpcPort, httpPort, listeningAddress, index, source, sourcetype, serverURI, sessionKey
 }
 
 func ReadFromStdin() (XMLInput, error) {

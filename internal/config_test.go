@@ -38,7 +38,7 @@ func TestParseInput(t *testing.T) {
 	require.Equal(t, "splunk-connect-for-otlp://specialmind", config.Configuration.Stanza.Name)
 	require.Equal(t, "main", config.Configuration.Stanza.Params[3].Value)
 
-	grpcPort, httpPort, listeningAddress, index, source, sourcetype := config.Extract()
+	grpcPort, httpPort, listeningAddress, index, source, sourcetype, serverURI, sessionKey := config.Extract()
 
 	require.Equal(t, 4317, grpcPort)
 	require.Equal(t, "0.0.0.0", listeningAddress)
@@ -46,4 +46,6 @@ func TestParseInput(t *testing.T) {
 	require.Equal(t, "main", index)
 	require.Equal(t, "", source)
 	require.Equal(t, "_splunk-connect-for-otlp", sourcetype)
+	require.Equal(t, "https://127.0.0.1:8089", serverURI)
+	require.Equal(t, "OwLHq7jpfgz0WLe5t8KwZuxT4QZRggryMB2io6Phimb2zi5ErifFvx0Eu8WTmfviO^KUKEA8CsGbVltVlCDlYOBM0RE8QoOjOHZhKnHsphk20XoqaK1KXTZj1N", sessionKey)
 }
