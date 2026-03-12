@@ -9,5 +9,8 @@ import (
 )
 
 type Config struct {
+	Index            string
+	Source           string
+	Sourcetype       string
 	QueueBatchConfig configoptional.Optional[exporterhelper.QueueBatchConfig] `mapstructure:"batch_config"`
 }
