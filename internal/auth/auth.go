@@ -50,7 +50,6 @@ func New(ctx context.Context, settings component.TelemetrySettings, serverURI, s
 	if err != nil {
 		return nil, err
 	}
-	println(os.Stderr, string(body))
 
 	f := Feed{}
 	err = xml.Unmarshal(body, &f)
