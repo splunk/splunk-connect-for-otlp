@@ -5,12 +5,15 @@ package main
 
 import (
 	"fmt"
+	"net"
 	"os"
 	"path/filepath"
 	"strings"
 	"syscall"
 	"testing"
 	"time"
+
+	"github.com/splunk/otlp2splunk/internal/auth/test"
 
 	"github.com/splunk/otlp2splunk/internal"
 	"github.com/splunk/otlp2splunk/internal/testutils"
@@ -40,7 +43,22 @@ func TestRunReturnsErrorForInvalidInput(t *testing.T) {
 }
 
 func TestRunStartsAndStopsOnSignal(t *testing.T) {
-	restoreStdin := testutils.WriteToStdin(t, `<input><configuration><stanza name="splunk-connect-for-otlp://test" app="search"><param name="grpc_port">0</param><param name="http_port">0</param><param name="listen_address">127.0.0.1</param></stanza></configuration></input>`)
+	listener, err := net.Listen("tcp", "127.0.0.1:0")
+	require.NoError(t, err)
+	test.SetupAuth(listener, t)
+
+	restoreStdin := testutils.WriteToStdin(t, fmt.Sprintf(
+		`<input>
+  <server_uri>http://%s</server_uri>
+  <session_key>mysessionkey</session_key>
+<configuration>
+  <stanza name="splunk-connect-for-otlp://test" app="search">
+    <param name="grpc_port">0</param>
+    <param name="http_port">0</param>
+    <param name="listen_address">127.0.0.1</param>
+  </stanza>
+</configuration>
+</input>`, listener.Addr().String()))
 	defer restoreStdin()
 
 	done := make(chan error, 1)
@@ -61,6 +79,10 @@ func TestRunStartsAndStopsOnSignal(t *testing.T) {
 }
 
 func TestExpectedHEC(t *testing.T) {
+	listener, err := net.Listen("tcp", "127.0.0.1:0")
+	require.NoError(t, err)
+	test.SetupAuth(listener, t)
+
 	tests := []struct {
 		name         string
 		otlpendpoint string
@@ -111,7 +133,10 @@ func TestExpectedHEC(t *testing.T) {
 			grpcPort := testutils.GetFreePort(t)
 			httpPort := testutils.GetFreePort(t)
 
-			config := fmt.Sprintf(`<input><configuration><stanza name="splunk-connect-for-otlp://test" app="search"><param name="grpc_port">%d</param><param name="http_port">%d</param><param name="listen_address">127.0.0.1</param></stanza></configuration></input>`, grpcPort, httpPort)
+			config := fmt.Sprintf(`<input>
+  <server_uri>http://%s</server_uri>
+  <session_key>mysessionkey</session_key>
+<configuration><stanza name="splunk-connect-for-otlp://test" app="search"><param name="grpc_port">%d</param><param name="http_port">%d</param><param name="listen_address">127.0.0.1</param></stanza></configuration></input>`, listener.Addr().String(), grpcPort, httpPort)
 
 			restoreStdin := testutils.WriteToStdin(t, config)
 			t.Cleanup(restoreStdin)

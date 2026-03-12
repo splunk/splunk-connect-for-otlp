@@ -233,7 +233,10 @@ func PostOTLP(t *testing.T, port int, path string, body []byte) {
 
 	lastRespCode := 0
 	for {
-		resp, err := http.Post(url, "application/json", bytes.NewReader(body))
+		req, _ := http.NewRequest(http.MethodPost, url, bytes.NewReader(body))
+		req.Header.Set("Content-Type", "application/json")
+		req.Header.Set("Authorization", "Splunk 00000000-0000-0000-0000-0000000000000")
+		resp, err := http.DefaultClient.Do(req)
 		if err == nil {
 			lastRespCode = resp.StatusCode
 			_ = resp.Body.Close()
