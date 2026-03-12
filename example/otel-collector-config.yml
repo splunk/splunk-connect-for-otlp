@@ -6,7 +6,7 @@ exporters:
     otlphttp:
       endpoint: "http://splunk:4318"
       headers:
-        Authorization: "Splunk 00000000-0000-0000-0000-0000000000000"
+        authorization: "Splunk 00000000-0000-0000-0000-0000000000000"
 
 processors:
     resource:
