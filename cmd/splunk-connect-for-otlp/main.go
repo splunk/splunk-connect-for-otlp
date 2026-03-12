@@ -98,8 +98,8 @@ func run() error {
 	cfg := rf.CreateDefaultConfig().(*otlpreceiver.Config)
 	cfg.GRPC.GetOrInsertDefault().NetAddr.Endpoint = fmt.Sprintf("%s:%d", listeningAddress, grpcPort)
 	cfg.HTTP.GetOrInsertDefault().ServerConfig.NetAddr.Endpoint = fmt.Sprintf("%s:%d", listeningAddress, httpPort)
-	cfg.GRPC.Get().Auth.GetOrInsertDefault().AuthenticatorID = component.MustNewID("token")
-	cfg.HTTP.Get().ServerConfig.Auth.GetOrInsertDefault().AuthenticatorID = component.MustNewID("token")
+	cfg.GRPC.Get().Auth.GetOrInsertDefault().AuthenticatorID = component.MustNewID("bearertokenauth")
+	cfg.HTTP.Get().ServerConfig.Auth.GetOrInsertDefault().AuthenticatorID = component.MustNewID("bearertokenauth")
 
 	otlpSettings := receiver.Settings{
 		TelemetrySettings: settings,
@@ -126,7 +126,7 @@ func run() error {
 	h := &internal.TTYHost{
 		ErrStatus: make(chan error, 1),
 		Extensions: map[component.ID]component.Component{
-			component.MustNewID("token"): auth,
+			component.MustNewID("bearertokenauth"): auth,
 		},
 	}
 	h.Start()

@@ -21,9 +21,8 @@ import (
 	"fmt"
 	"io"
 	"net/http"
-	"os"
 
-	"github.com/splunk/otlp2splunk/internal/auth/bearerauthextension"
+	"github.com/open-telemetry/opentelemetry-collector-contrib/extension/bearertokenauthextension"
 	"go.opentelemetry.io/collector/component"
 	"go.opentelemetry.io/collector/config/configopaque"
 	"go.opentelemetry.io/collector/extension"
@@ -51,7 +50,7 @@ func New(ctx context.Context, settings component.TelemetrySettings, serverURI, s
 		return nil, err
 	}
 
-	f := Feed{}
+	f := feed{}
 	err = xml.Unmarshal(body, &f)
 	if err != nil {
 		return nil, err
@@ -66,17 +65,20 @@ func New(ctx context.Context, settings component.TelemetrySettings, serverURI, s
 		}
 	}
 
-	baef := bearerauthextension.NewFactory()
-	authConfig := baef.CreateDefaultConfig().(*bearerauthextension.Config)
+	btae := bearertokenauthextension.NewFactory()
+	authConfig := btae.CreateDefaultConfig().(*bearertokenauthextension.Config)
 	authConfig.Tokens = tokens
+	authConfig.Scheme = "Splunk"
 
-	return baef.Create(ctx, extension.Settings{
-		ID:                component.MustNewID("token"),
+	return btae.Create(ctx, extension.Settings{
+		ID:                component.MustNewID("bearertokenauth"),
 		TelemetrySettings: settings,
 	}, authConfig)
 }
 
-type Feed struct {
+// feed is generated from the atom feed XML response of the Splunk instance, per
+// https://help.splunk.com/en/splunk-enterprise/leverage-rest-apis/rest-api-user-manual/9.3/rest-api-user-manual/basic-concepts-about-the-splunk-platform-rest-api
+type feed struct {
 	XMLName    xml.Name `xml:"feed"`
 	Text       string   `xml:",chardata"`
 	Xmlns      string   `xml:"xmlns,attr"`
