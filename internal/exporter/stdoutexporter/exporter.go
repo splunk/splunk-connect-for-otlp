@@ -6,7 +6,10 @@ package stdoutexporter
 import (
 	"context"
 	"errors"
+	"fmt"
 	"os"
+
+	"github.com/splunk/otlp2splunk/internal/auth"
 
 	"github.com/goccy/go-json"
 	translator "github.com/open-telemetry/opentelemetry-collector-contrib/pkg/translator/splunk"
@@ -18,6 +21,10 @@ import (
 	"go.opentelemetry.io/collector/pdata/plog"
 	"go.opentelemetry.io/collector/pdata/pmetric"
 	"go.opentelemetry.io/collector/pdata/ptrace"
+)
+
+const (
+	defaultIndexLabel = "com.splunk.index"
 )
 
 var stdoutWriter = defaultStdoutWriter
@@ -65,9 +72,45 @@ type stdoutExporter struct {
 	sourcetype        string
 }
 
-func (se *stdoutExporter) ConsumeLogs(_ context.Context, ld plog.Logs) error {
+func (se *stdoutExporter) ConsumeLogs(ctx context.Context, ld plog.Logs) error {
 	toOtelAttrs := translator.DefaultHecToOtelAttrs()
 	toHecAttrs := translator.DefaultOtelToHecFields()
+
+	tokenConfig := ctx.Value(auth.ContextKey).(auth.HecTokenConfig)
+	allowedIndices := make(map[string]struct{}, len(tokenConfig.AllowedIndexes))
+	for _, index := range tokenConfig.AllowedIndexes {
+		allowedIndices[index] = struct{}{}
+	}
+	for i := 0; i < ld.ResourceLogs().Len(); i++ {
+		rl := ld.ResourceLogs().At(i)
+		r := rl.Resource()
+		for j := 0; j < rl.ScopeLogs().Len(); j++ {
+			sl := rl.ScopeLogs().At(j)
+			for k := 0; k < sl.LogRecords().Len(); k++ {
+				logRecord := sl.LogRecords().At(k)
+				if logIndex, ok := logRecord.Attributes().Get(defaultIndexLabel); ok {
+					logIndexStr := logIndex.AsString()
+					if logIndexStr != "" {
+						if _, ok := allowedIndices[logIndexStr]; !ok {
+							return fmt.Errorf("index %q is not allowed", logIndexStr)
+						} else {
+							continue
+						}
+					}
+				}
+				if resourceIndex, ok := r.Attributes().Get(defaultIndexLabel); ok {
+					resourceIndexStr := resourceIndex.AsString()
+					if resourceIndexStr != "" {
+						if _, ok := allowedIndices[resourceIndexStr]; !ok {
+							return fmt.Errorf("index %q is not allowed", resourceIndexStr)
+						} else {
+							continue
+						}
+					}
+				}
+			}
+		}
+	}
 
 	var errs []error
 	for i := 0; i < ld.ResourceLogs().Len(); i++ {
@@ -95,8 +138,44 @@ func (se *stdoutExporter) ConsumeLogs(_ context.Context, ld plog.Logs) error {
 	return errors.Join(errs...)
 }
 
-func (se *stdoutExporter) ConsumeTraces(_ context.Context, td ptrace.Traces) error {
+func (se *stdoutExporter) ConsumeTraces(ctx context.Context, td ptrace.Traces) error {
 	toOtelAttrs := translator.DefaultHecToOtelAttrs()
+
+	tokenConfig := ctx.Value(auth.ContextKey).(auth.HecTokenConfig)
+	allowedIndices := make(map[string]struct{}, len(tokenConfig.AllowedIndexes))
+	for _, index := range tokenConfig.AllowedIndexes {
+		allowedIndices[index] = struct{}{}
+	}
+	for i := 0; i < td.ResourceSpans().Len(); i++ {
+		rs := td.ResourceSpans().At(i)
+		r := rs.Resource()
+		for j := 0; j < rs.ScopeSpans().Len(); j++ {
+			ss := rs.ScopeSpans().At(j)
+			for k := 0; k < ss.Spans().Len(); k++ {
+				span := ss.Spans().At(k)
+				if spanIndex, ok := span.Attributes().Get(defaultIndexLabel); ok {
+					spanIndexStr := spanIndex.AsString()
+					if spanIndexStr != "" {
+						if _, ok := allowedIndices[spanIndexStr]; !ok {
+							return fmt.Errorf("index %q is not allowed", spanIndexStr)
+						} else {
+							continue
+						}
+					}
+				}
+				if resourceIndex, ok := r.Attributes().Get(defaultIndexLabel); ok {
+					resourceIndexStr := resourceIndex.AsString()
+					if resourceIndexStr != "" {
+						if _, ok := allowedIndices[resourceIndexStr]; !ok {
+							return fmt.Errorf("index %q is not allowed", resourceIndexStr)
+						} else {
+							continue
+						}
+					}
+				}
+			}
+		}
+	}
 
 	var errs []error
 	for i := 0; i < td.ResourceSpans().Len(); i++ {
@@ -120,8 +199,104 @@ func (se *stdoutExporter) ConsumeTraces(_ context.Context, td ptrace.Traces) err
 	return errors.Join(errs...)
 }
 
-func (se *stdoutExporter) ConsumeMetrics(_ context.Context, md pmetric.Metrics) error {
+func (se *stdoutExporter) ConsumeMetrics(ctx context.Context, md pmetric.Metrics) error {
 	toOtelAttrs := translator.DefaultHecToOtelAttrs()
+
+	tokenConfig := ctx.Value(auth.ContextKey).(auth.HecTokenConfig)
+	allowedIndices := make(map[string]struct{}, len(tokenConfig.AllowedIndexes))
+	for _, index := range tokenConfig.AllowedIndexes {
+		allowedIndices[index] = struct{}{}
+	}
+	for i := 0; i < md.ResourceMetrics().Len(); i++ {
+		rm := md.ResourceMetrics().At(i)
+		r := rm.Resource()
+		for j := 0; j < rm.ScopeMetrics().Len(); j++ {
+			sm := rm.ScopeMetrics().At(j)
+			for k := 0; k < sm.Metrics().Len(); k++ {
+				m := sm.Metrics().At(k)
+				switch m.Type() {
+				case pmetric.MetricTypeEmpty:
+				case pmetric.MetricTypeGauge:
+					g := m.Gauge()
+					for k := 0; k < g.DataPoints().Len(); k++ {
+						dp := g.DataPoints().At(k)
+						if metricIndex, ok := dp.Attributes().Get(defaultIndexLabel); ok {
+							metricIndexStr := metricIndex.AsString()
+							if metricIndexStr != "" {
+								if _, ok := allowedIndices[metricIndexStr]; !ok {
+									return fmt.Errorf("index %q is not allowed", metricIndexStr)
+								} else {
+									continue
+								}
+							}
+						}
+					}
+				case pmetric.MetricTypeSum:
+					sum := m.Sum()
+					for k := 0; k < sum.DataPoints().Len(); k++ {
+						dp := sum.DataPoints().At(k)
+						if metricIndex, ok := dp.Attributes().Get(defaultIndexLabel); ok {
+							metricIndexStr := metricIndex.AsString()
+							if metricIndexStr != "" {
+								if _, ok := allowedIndices[metricIndexStr]; !ok {
+									return fmt.Errorf("index %q is not allowed", metricIndexStr)
+								}
+							}
+						}
+					}
+				case pmetric.MetricTypeHistogram:
+					h := m.Histogram()
+					for k := 0; k < h.DataPoints().Len(); k++ {
+						dp := h.DataPoints().At(k)
+						if metricIndex, ok := dp.Attributes().Get(defaultIndexLabel); ok {
+							metricIndexStr := metricIndex.AsString()
+							if metricIndexStr != "" {
+								if _, ok := allowedIndices[metricIndexStr]; !ok {
+									return fmt.Errorf("index %q is not allowed", metricIndexStr)
+								}
+							}
+						}
+					}
+				case pmetric.MetricTypeSummary:
+					ms := m.Summary()
+					for k := 0; k < ms.DataPoints().Len(); k++ {
+						dp := ms.DataPoints().At(k)
+						if metricIndex, ok := dp.Attributes().Get(defaultIndexLabel); ok {
+							metricIndexStr := metricIndex.AsString()
+							if metricIndexStr != "" {
+								if _, ok := allowedIndices[metricIndexStr]; !ok {
+									return fmt.Errorf("index %q is not allowed", metricIndexStr)
+								}
+							}
+						}
+					}
+				case pmetric.MetricTypeExponentialHistogram:
+					h := m.ExponentialHistogram()
+					for k := 0; k < h.DataPoints().Len(); k++ {
+						dp := h.DataPoints().At(k)
+						if metricIndex, ok := dp.Attributes().Get(defaultIndexLabel); ok {
+							metricIndexStr := metricIndex.AsString()
+							if metricIndexStr != "" {
+								if _, ok := allowedIndices[metricIndexStr]; !ok {
+									return fmt.Errorf("index %q is not allowed", metricIndexStr)
+								}
+							}
+						}
+					}
+				}
+				if resourceIndex, ok := r.Attributes().Get(defaultIndexLabel); ok {
+					resourceIndexStr := resourceIndex.AsString()
+					if resourceIndexStr != "" {
+						if _, ok := allowedIndices[resourceIndexStr]; !ok {
+							return fmt.Errorf("index %q is not allowed", resourceIndexStr)
+						} else {
+							continue
+						}
+					}
+				}
+			}
+		}
+	}
 
 	var errs []error
 	for i := 0; i < md.ResourceMetrics().Len(); i++ {

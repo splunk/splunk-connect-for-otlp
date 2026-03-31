@@ -37,11 +37,10 @@ type XMLParam struct {
 	Value string `xml:",innerxml"`
 }
 
-func (x XMLInput) Extract() (int, int, string, string, string, string, string, string) {
+func (x XMLInput) Extract() (int, int, string, string, string, string, string) {
 	grpcPort := DefaultGrpcPort
 	httpPort := DefaultHTTPPort
 	listeningAddress := DefaultListenAddress
-	index := ""
 	source := ""
 	sourcetype := ""
 
@@ -56,8 +55,6 @@ func (x XMLInput) Extract() (int, int, string, string, string, string, string, s
 			httpPort, _ = strconv.Atoi(p.Value)
 		case "listen_address":
 			listeningAddress = p.Value
-		case "index":
-			index = p.Value
 		case "source":
 			source = p.Value
 		case "sourcetype":
@@ -65,7 +62,7 @@ func (x XMLInput) Extract() (int, int, string, string, string, string, string, s
 		}
 	}
 
-	return grpcPort, httpPort, listeningAddress, index, source, sourcetype, serverURI, sessionKey
+	return grpcPort, httpPort, listeningAddress, source, sourcetype, serverURI, sessionKey
 }
 
 func ReadFromStdin() (XMLInput, error) {

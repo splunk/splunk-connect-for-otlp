@@ -4,7 +4,6 @@ go 1.25.0
 
 require (
 	github.com/goccy/go-json v0.10.6
-	github.com/open-telemetry/opentelemetry-collector-contrib/extension/bearertokenauthextension v0.149.0
 	github.com/open-telemetry/opentelemetry-collector-contrib/pkg/translator/splunk v0.149.0
 	github.com/stretchr/testify v1.11.1
 	go.opentelemetry.io/collector/component v1.55.0
@@ -18,11 +17,13 @@ require (
 	go.opentelemetry.io/collector/exporter/exportertest v0.149.0
 	go.opentelemetry.io/collector/extension v1.55.0
 	go.opentelemetry.io/collector/extension/extensionauth v1.55.0
+	go.opentelemetry.io/collector/extension/extensiontest v0.149.0
 	go.opentelemetry.io/collector/pdata v1.55.0
 	go.opentelemetry.io/collector/receiver v1.55.0
 	go.opentelemetry.io/collector/receiver/otlpreceiver v0.149.0
 	go.opentelemetry.io/otel/metric v1.42.0
 	go.opentelemetry.io/otel/trace v1.42.0
+	go.uber.org/goleak v1.3.0
 	go.uber.org/zap v1.27.1
 	gopkg.in/yaml.v3 v3.0.1
 )
@@ -103,5 +104,3 @@ require (
 	google.golang.org/grpc v1.79.3 // indirect
 	google.golang.org/protobuf v1.36.11 // indirect
 )
-
-replace github.com/splunk/otlp2splunk/internal/testutils => ./internal/testutils

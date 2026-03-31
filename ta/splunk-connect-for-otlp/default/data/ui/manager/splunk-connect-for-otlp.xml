@@ -47,22 +47,6 @@
             <view name="edit"/>
             <view name="create"/>
             <elements>
-                <element name="index" type="select" label="Index">
-                    <view name="list"/>
-                    <view name="edit"/>
-                    <view name="create"/>
-                    <key name="dynamicOptions" type="dict">
-                        <key name="keyName">title</key>
-                        <key name="keyValue">title</key>
-                        <key name="splunkSource">'/data/indexes'</key>
-                        <key name="splunkSourceParams" type="dict">
-                            <key name="search">'isInternal=false disabled=false'</key>
-                            <key name="count">-1</key>
-                            <key name="datatype">'all'</key>
-                        </key>
-                    </key>
-                    <key name="helpText">Default index</key>
-                </element>
                 <element name="source" label="Source">
                     <view name="list"/>
                     <view name="edit"/>
