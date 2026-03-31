@@ -19,7 +19,7 @@ services:
       - ./output:/output
   # Splunk instance
   splunk:
-    image: splunk/splunk:9.3
+    image: splunk/splunk:9.4
     profiles:
       - splunk
     container_name: splunk
