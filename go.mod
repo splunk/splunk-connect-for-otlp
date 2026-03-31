@@ -3,7 +3,7 @@ module github.com/splunk/otlp2splunk
 go 1.25.0
 
 require (
-	github.com/open-telemetry/opentelemetry-collector-contrib/extension/bearertokenauthextension v0.147.0
+	github.com/open-telemetry/opentelemetry-collector-contrib/extension/bearertokenauthextension v0.148.0
 	github.com/splunk/otlp2splunk/internal/exporter/stdoutexporter v0.0.1
 	github.com/splunk/otlp2splunk/internal/testutils v0.0.1
 	github.com/stretchr/testify v1.11.1

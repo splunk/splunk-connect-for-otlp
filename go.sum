@@ -65,8 +65,8 @@ github.com/modern-go/reflect2 v1.0.3-0.20250322232337-35a7c28c31ee h1:W5t00kpgFd
 github.com/modern-go/reflect2 v1.0.3-0.20250322232337-35a7c28c31ee/go.mod h1:yWuevngMOJpCy52FWWMvUC8ws7m/LJsjYzDa0/r8luk=
 github.com/mostynb/go-grpc-compression v1.2.3 h1:42/BKWMy0KEJGSdWvzqIyOZ95YcR9mLPqKctH7Uo//I=
 github.com/mostynb/go-grpc-compression v1.2.3/go.mod h1:AghIxF3P57umzqM9yz795+y1Vjs47Km/Y2FE6ouQ7Lg=
-github.com/open-telemetry/opentelemetry-collector-contrib/extension/bearertokenauthextension v0.147.0 h1:Qu+tMrwLH5KbyDhr8BqPjE++FtrMnMpZRMivl888OTE=
-github.com/open-telemetry/opentelemetry-collector-contrib/extension/bearertokenauthextension v0.147.0/go.mod h1:4CHacEenLfDT00AcMqIeu032rCl9Pk6HoWGn4e4Ur68=
+github.com/open-telemetry/opentelemetry-collector-contrib/extension/bearertokenauthextension v0.148.0 h1:eMQdfLxcLmo24y+yEPHiWXBah6+hFlAwmegKl2/kBcM=
+github.com/open-telemetry/opentelemetry-collector-contrib/extension/bearertokenauthextension v0.148.0/go.mod h1:CFx/tIQVFk+7ZTSflXJ9RKY2MuqVAAl3Ere9JJJ+jbE=
 github.com/open-telemetry/opentelemetry-collector-contrib/internal/coreinternal v0.143.0 h1:SuD/zqlxcQwvaMVlnmvktFpS01EEnzRZ0VsAs7KhHZQ=
 github.com/open-telemetry/opentelemetry-collector-contrib/internal/coreinternal v0.143.0/go.mod h1:4MSwXoV3wmdUX9dC3qbBfP4DkWaWZl3KI7mmULn/gm0=
 github.com/open-telemetry/opentelemetry-collector-contrib/internal/splunk v0.143.0 h1:fcX5RuuMXUxE+Mfb2PtmPFzwfQvAUvww3XNIoCVGvWU=
