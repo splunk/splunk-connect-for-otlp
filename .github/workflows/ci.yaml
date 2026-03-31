@@ -13,7 +13,7 @@ jobs:
     name: tidy
     runs-on: ubuntu-24.04
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
       - uses: ./.github/actions/setup-environment
 
       - name: tidy
@@ -28,7 +28,7 @@ jobs:
     name: gofmt
     runs-on: ubuntu-24.04
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
       - uses: ./.github/actions/setup-environment
 
       - name: gofmt
@@ -43,12 +43,12 @@ jobs:
     name: lint
     runs-on: ubuntu-24.04
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
       - uses: ./.github/actions/setup-environment
 
       - run: echo "GOLANGCI_LINT_CACHE=${HOME}/.cache/golangci-lint" >> "$GITHUB_ENV"
 
-      - uses: actions/cache@v4
+      - uses: actions/cache@v5
         with:
           path: ${{ env.GOLANGCI_LINT_CACHE }}
           key: golangci-lint-${{ hashFiles('**/.golangci.yml', '**/*.go', '**/go.sum') }}
@@ -60,7 +60,7 @@ jobs:
     timeout-minutes: 30
     runs-on: ubuntu-24.04
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
       - uses: ./.github/actions/setup-environment
 
       - name: Build
@@ -70,7 +70,7 @@ jobs:
     timeout-minutes: 30
     runs-on: ubuntu-24.04
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
       - uses: ./.github/actions/setup-environment
       - name: Tests
         run: make test-all
@@ -79,7 +79,7 @@ jobs:
     timeout-minutes: 30
     runs-on: ubuntu-24.04
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
       - uses: ./.github/actions/setup-environment
       - name: Benchmarks
         run: make benchmark-all
@@ -88,14 +88,14 @@ jobs:
     name: coverage
     runs-on: ubuntu-24.04
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
       - uses: ./.github/actions/setup-environment
 
       - name: Run Unit Tests With Coverage
         run: COVER_TESTING=true make gotest-with-codecov
 
       - name: Upload coverage report
-        uses: codecov/codecov-action@1af58845a975a7985b0beb0cbe6fbbb71a41dbad # 5.5.3
+        uses: codecov/codecov-action@57e3a136b779b570ffcdbf80b3bdc90e7fab3de2 # 6.0.0
         with:
           fail_ci_if_error: true
           verbose: true
@@ -115,7 +115,7 @@ jobs:
         run: make tgz
 
       - name: Release
-        uses: softprops/action-gh-release@a06a81a03ee405af7f2048a818ed3f03bbf83c7b # v2.5.0
+        uses: softprops/action-gh-release@153bb8e04406b158c6c84fc1615b65b24149a1fe # v2.6.1
         with:
           fail_on_unmatched_files: true
           files: |

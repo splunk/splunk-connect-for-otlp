@@ -15,14 +15,14 @@ const Scheme = `
             <arg name="grpc_port">
                 <title>gRPC port</title>
                 <description>Port on which the receiver will listen for gRPC OTLP traffic</description>
-                <validation>is_avail_tcp_port('grpc_port')</validation>
+                <validation>is_port('grpc_port')</validation>
                 <required_on_create>false</required_on_create>
             </arg>
 
             <arg name="http_port">
                 <title>HTTP Port</title>
                 <description>Port on which the receiver will listen for HTTP OTLP traffic</description>
-                <validation>is_avail_tcp_port('http_port')</validation>
+                <validation>is_port('http_port')</validation>
                 <required_on_create>false</required_on_create>
             </arg>
 
