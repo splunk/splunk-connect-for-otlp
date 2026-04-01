@@ -7,14 +7,14 @@ require (
 	github.com/open-telemetry/opentelemetry-collector-contrib/pkg/translator/splunk v0.143.0
 	github.com/splunk/otlp2splunk/internal/testutils v0.0.1
 	github.com/stretchr/testify v1.11.1
-	go.opentelemetry.io/collector/component v1.54.0
-	go.opentelemetry.io/collector/component/componenttest v0.148.0
+	go.opentelemetry.io/collector/component v1.55.0
+	go.opentelemetry.io/collector/component/componenttest v0.149.0
 	go.opentelemetry.io/collector/config/configoptional v1.54.0
 	go.opentelemetry.io/collector/consumer v1.54.0
 	go.opentelemetry.io/collector/exporter v1.54.0
 	go.opentelemetry.io/collector/exporter/exporterhelper v0.148.0
 	go.opentelemetry.io/collector/exporter/exportertest v0.148.0
-	go.opentelemetry.io/collector/pdata v1.54.0
+	go.opentelemetry.io/collector/pdata v1.55.0
 )
 
 require (
@@ -50,7 +50,7 @@ require (
 	go.opentelemetry.io/collector/exporter/xexporter v0.148.0 // indirect
 	go.opentelemetry.io/collector/extension v1.54.0 // indirect
 	go.opentelemetry.io/collector/extension/xextension v0.148.0 // indirect
-	go.opentelemetry.io/collector/featuregate v1.54.0 // indirect
+	go.opentelemetry.io/collector/featuregate v1.55.0 // indirect
 	go.opentelemetry.io/collector/internal/componentalias v0.148.0 // indirect
 	go.opentelemetry.io/collector/pdata/pprofile v0.148.0 // indirect
 	go.opentelemetry.io/collector/pdata/xpdata v0.148.0 // indirect
