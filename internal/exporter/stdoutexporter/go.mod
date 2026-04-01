@@ -3,7 +3,7 @@ module github.com/splunk/otlp2splunk/internal/exporter/stdoutexporter
 go 1.25.0
 
 require (
-	github.com/goccy/go-json v0.10.5
+	github.com/goccy/go-json v0.10.6
 	github.com/open-telemetry/opentelemetry-collector-contrib/pkg/translator/splunk v0.143.0
 	github.com/splunk/otlp2splunk/internal/testutils v0.0.1
 	github.com/stretchr/testify v1.11.1
