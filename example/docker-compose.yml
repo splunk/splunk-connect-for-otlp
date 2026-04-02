@@ -1,4 +1,3 @@
-version: "3"
 services:
   # Sample bash script producing logs.
   logging:
