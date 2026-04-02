@@ -7,14 +7,14 @@ require (
 	github.com/splunk/otlp2splunk/internal/exporter/stdoutexporter v0.0.1
 	github.com/splunk/otlp2splunk/internal/testutils v0.0.1
 	github.com/stretchr/testify v1.11.1
-	go.opentelemetry.io/collector/component v1.54.0
+	go.opentelemetry.io/collector/component v1.55.0
 	go.opentelemetry.io/collector/component/componentstatus v0.148.0
 	go.opentelemetry.io/collector/component/componenttest v0.148.0
 	go.opentelemetry.io/collector/config/configopaque v1.54.0
 	go.opentelemetry.io/collector/exporter v1.54.0
-	go.opentelemetry.io/collector/extension v1.54.0
+	go.opentelemetry.io/collector/extension v1.55.0
 	go.opentelemetry.io/collector/extension/extensionauth v1.54.0
-	go.opentelemetry.io/collector/pdata v1.54.0
+	go.opentelemetry.io/collector/pdata v1.55.0
 	go.opentelemetry.io/collector/receiver v1.54.0
 	go.opentelemetry.io/collector/receiver/otlpreceiver v0.148.0
 	go.opentelemetry.io/otel/metric v1.42.0
@@ -75,8 +75,8 @@ require (
 	go.opentelemetry.io/collector/exporter/exporterhelper v0.148.0 // indirect
 	go.opentelemetry.io/collector/extension/extensionmiddleware v0.148.0 // indirect
 	go.opentelemetry.io/collector/extension/xextension v0.148.0 // indirect
-	go.opentelemetry.io/collector/featuregate v1.54.0 // indirect
-	go.opentelemetry.io/collector/internal/componentalias v0.148.0 // indirect
+	go.opentelemetry.io/collector/featuregate v1.55.0 // indirect
+	go.opentelemetry.io/collector/internal/componentalias v0.149.0 // indirect
 	go.opentelemetry.io/collector/internal/sharedcomponent v0.148.0 // indirect
 	go.opentelemetry.io/collector/internal/telemetry v0.148.0 // indirect
 	go.opentelemetry.io/collector/pdata/pprofile v0.148.0 // indirect
