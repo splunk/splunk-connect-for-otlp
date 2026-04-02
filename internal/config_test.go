@@ -25,6 +25,9 @@ func TestParseInput(t *testing.T) {
       <param name="http_port">4318</param>
       <param name="listen_address">0.0.0.0</param>
       <param name="sourcetype">_splunk-connect-for-otlp</param>
+      <param name="enableSSL">1</param>
+      <param name="serverCert">/var/certs/server.cert</param>
+      <param name="serverKey">/var/certs/server.key</param>
       <param name="start_by_shell">false</param>
     </stanza>
   </configuration>
@@ -36,7 +39,7 @@ func TestParseInput(t *testing.T) {
 
 	require.Equal(t, "splunk-connect-for-otlp://specialmind", config.Configuration.Stanza.Name)
 
-	grpcPort, httpPort, listeningAddress, source, sourcetype, serverURI, sessionKey := config.Extract()
+	grpcPort, httpPort, listeningAddress, source, sourcetype, serverURI, sessionKey, enableSSL, serverCert, serverKey := config.Extract()
 
 	require.Equal(t, 4317, grpcPort)
 	require.Equal(t, "0.0.0.0", listeningAddress)
@@ -45,4 +48,7 @@ func TestParseInput(t *testing.T) {
 	require.Equal(t, "_splunk-connect-for-otlp", sourcetype)
 	require.Equal(t, "https://127.0.0.1:8089", serverURI)
 	require.Equal(t, "OwLHq7jpfgz0WLe5t8KwZuxT4QZRggryMB2io6Phimb2zi5ErifFvx0Eu8WTmfviO^KUKEA8CsGbVltVlCDlYOBM0RE8QoOjOHZhKnHsphk20XoqaK1KXTZj1N", sessionKey)
+	require.True(t, enableSSL)
+	require.Equal(t, "/var/certs/server.cert", serverCert)
+	require.Equal(t, "/var/certs/server.key", serverKey)
 }

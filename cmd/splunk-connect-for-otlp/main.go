@@ -68,7 +68,7 @@ func run() error {
 		Resource:       pcommon.NewResource(),
 	}
 
-	grpcPort, httpPort, listeningAddress, source, sourcetype, serverURI, sessionKey := config.Extract()
+	grpcPort, httpPort, listeningAddress, source, sourcetype, serverURI, sessionKey, enableSSL, serverCert, serverKey := config.Extract()
 	stdoutCfg := stdoutexporter.NewFactory().CreateDefaultConfig().(*stdoutexporter.Config)
 	stdoutCfg.Source = source
 	stdoutCfg.Sourcetype = sourcetype
@@ -100,6 +100,13 @@ func run() error {
 	extID := component.MustNewID("splunkauth")
 	cfg.GRPC.Get().Auth.GetOrInsertDefault().AuthenticatorID = extID
 	cfg.HTTP.Get().ServerConfig.Auth.GetOrInsertDefault().AuthenticatorID = extID
+
+	if enableSSL {
+		cfg.GRPC.Get().TLS.GetOrInsertDefault().CertFile = serverCert
+		cfg.HTTP.Get().ServerConfig.TLS.GetOrInsertDefault().CertFile = serverCert
+		cfg.GRPC.Get().TLS.GetOrInsertDefault().KeyFile = serverKey
+		cfg.HTTP.Get().ServerConfig.TLS.GetOrInsertDefault().KeyFile = serverKey
+	}
 
 	otlpSettings := receiver.Settings{
 		TelemetrySettings: settings,

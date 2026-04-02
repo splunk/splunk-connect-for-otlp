@@ -37,12 +37,15 @@ type XMLParam struct {
 	Value string `xml:",innerxml"`
 }
 
-func (x XMLInput) Extract() (int, int, string, string, string, string, string) {
+func (x XMLInput) Extract() (int, int, string, string, string, string, string, bool, string, string) {
 	grpcPort := DefaultGrpcPort
 	httpPort := DefaultHTTPPort
 	listeningAddress := DefaultListenAddress
 	source := ""
 	sourcetype := ""
+	enableSSL := false
+	serverCert := ""
+	serverKey := ""
 
 	serverURI := x.ServerURI
 	sessionKey := x.SessionKey
@@ -59,10 +62,27 @@ func (x XMLInput) Extract() (int, int, string, string, string, string, string) {
 			source = p.Value
 		case "sourcetype":
 			sourcetype = p.Value
+		case "enableSSL":
+			enableSSL = convertBool(p.Value)
+		case "serverCert":
+			serverCert = p.Value
+		case "serverKey":
+			serverKey = p.Value
 		}
 	}
 
-	return grpcPort, httpPort, listeningAddress, source, sourcetype, serverURI, sessionKey
+	return grpcPort, httpPort, listeningAddress, source, sourcetype, serverURI, sessionKey, enableSSL, serverCert, serverKey
+}
+
+func convertBool(value string) bool {
+	switch value {
+	case "true":
+		return true
+	case "1":
+		return true
+	default:
+		return false
+	}
 }
 
 func ReadFromStdin() (XMLInput, error) {
