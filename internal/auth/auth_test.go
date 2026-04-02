@@ -35,11 +35,14 @@ func TestAuth(t *testing.T) {
 	require.NoError(t, err)
 	require.NotNil(t, e)
 	se := e.(extensionauth.Server)
-	_, err = se.Authenticate(context.Background(), map[string][]string{
+	ctx, err := se.Authenticate(context.Background(), map[string][]string{
 		"foo":           {"bar"},
 		"Authorization": {"Splunk 00000000-0000-0000-0000-0000000000000"},
 	})
 	require.NoError(t, err)
+	require.NotNil(t, ctx)
+	cfg := ctx.Value(auth.ContextKey).(auth.HecTokenConfig)
+	require.Equal(t, []string{"main", "foo"}, cfg.AllowedIndexes)
 	_, err = se.Authenticate(context.Background(), map[string][]string{
 		"foo":           {"bar"},
 		"Authorization": {"Splunk 00000000-0000-0000-0000-111111111111"},

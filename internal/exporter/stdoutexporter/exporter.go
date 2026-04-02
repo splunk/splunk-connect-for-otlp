@@ -30,39 +30,30 @@ const (
 var stdoutWriter = defaultStdoutWriter
 
 func newLogsExporter(ctx context.Context, set exporter.Settings, cfg component.Config) (exporter.Logs, error) {
-	oCfg := cfg.(*Config)
-
 	e := &stdoutExporter{}
 
 	return exporterhelper.NewLogs(ctx, set, cfg, e.ConsumeLogs,
 		exporterhelper.WithCapabilities(consumer.Capabilities{
 			MutatesData: false,
-		}),
-		exporterhelper.WithQueue(oCfg.QueueBatchConfig))
+		}))
 }
 
 func newTracesExporter(ctx context.Context, set exporter.Settings, cfg component.Config) (exporter.Traces, error) {
-	oCfg := cfg.(*Config)
-
 	e := &stdoutExporter{}
 
 	return exporterhelper.NewTraces(ctx, set, cfg, e.ConsumeTraces,
 		exporterhelper.WithCapabilities(consumer.Capabilities{
 			MutatesData: false,
-		}),
-		exporterhelper.WithQueue(oCfg.QueueBatchConfig))
+		}))
 }
 
 func newMetricsExporter(ctx context.Context, set exporter.Settings, cfg component.Config) (exporter.Metrics, error) {
-	oCfg := cfg.(*Config)
-
 	e := &stdoutExporter{}
 
 	return exporterhelper.NewMetrics(ctx, set, cfg, e.ConsumeMetrics,
 		exporterhelper.WithCapabilities(consumer.Capabilities{
 			MutatesData: false,
-		}),
-		exporterhelper.WithQueue(oCfg.QueueBatchConfig))
+		}))
 }
 
 type stdoutExporter struct {
@@ -77,9 +68,9 @@ func (se *stdoutExporter) ConsumeLogs(ctx context.Context, ld plog.Logs) error {
 	toHecAttrs := translator.DefaultOtelToHecFields()
 
 	tokenConfig := ctx.Value(auth.ContextKey).(auth.HecTokenConfig)
-	allowedIndices := make(map[string]struct{}, len(tokenConfig.AllowedIndexes))
+	mapIndexes := make(map[string]struct{}, len(tokenConfig.AllowedIndexes))
 	for _, index := range tokenConfig.AllowedIndexes {
-		allowedIndices[index] = struct{}{}
+		mapIndexes[index] = struct{}{}
 	}
 	for i := 0; i < ld.ResourceLogs().Len(); i++ {
 		rl := ld.ResourceLogs().At(i)
@@ -91,7 +82,7 @@ func (se *stdoutExporter) ConsumeLogs(ctx context.Context, ld plog.Logs) error {
 				if logIndex, ok := logRecord.Attributes().Get(defaultIndexLabel); ok {
 					logIndexStr := logIndex.AsString()
 					if logIndexStr != "" {
-						if _, ok := allowedIndices[logIndexStr]; !ok {
+						if _, ok := mapIndexes[logIndexStr]; !ok {
 							return fmt.Errorf("index %q is not allowed", logIndexStr)
 						} else {
 							continue
@@ -101,7 +92,7 @@ func (se *stdoutExporter) ConsumeLogs(ctx context.Context, ld plog.Logs) error {
 				if resourceIndex, ok := r.Attributes().Get(defaultIndexLabel); ok {
 					resourceIndexStr := resourceIndex.AsString()
 					if resourceIndexStr != "" {
-						if _, ok := allowedIndices[resourceIndexStr]; !ok {
+						if _, ok := mapIndexes[resourceIndexStr]; !ok {
 							return fmt.Errorf("index %q is not allowed", resourceIndexStr)
 						} else {
 							continue

@@ -3,13 +3,7 @@
 
 package stdoutexporter
 
-import (
-	"go.opentelemetry.io/collector/config/configoptional"
-	"go.opentelemetry.io/collector/exporter/exporterhelper"
-)
-
 type Config struct {
-	Source           string
-	Sourcetype       string
-	QueueBatchConfig configoptional.Optional[exporterhelper.QueueBatchConfig] `mapstructure:"batch_config"`
+	Source     string
+	Sourcetype string
 }

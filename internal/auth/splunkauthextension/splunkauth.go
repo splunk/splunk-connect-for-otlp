@@ -9,7 +9,6 @@ import (
 	"errors"
 	"fmt"
 	"strings"
-	"sync/atomic"
 
 	"go.opentelemetry.io/collector/config/configopaque"
 
@@ -28,14 +27,13 @@ type Key string
 
 const ContextKey Key = "hec"
 
-// BearerTokenAuth is an implementation of extensionauth interfaces. It embeds a static authorization "bearer" token in every rpc call.
 type splunkAuth struct {
-	authorizationValuesAtomic atomic.Value
-	shutdownCH                chan struct{}
-	logger                    *zap.Logger
-	header                    string
-	scheme                    string
-	filename                  string
+	shutdownCH chan struct{}
+	logger     *zap.Logger
+	header     string
+	scheme     string
+	filename   string
+	tokens     []HecTokenConfig
 }
 
 const (
@@ -43,7 +41,7 @@ const (
 	defaultScheme = "Splunk"
 )
 
-func newBearerTokenAuth(cfg *Config, logger *zap.Logger) *splunkAuth {
+func newSplunkAuth(cfg *Config, logger *zap.Logger) *splunkAuth {
 	a := &splunkAuth{
 		header: defaultHeader,
 		scheme: defaultScheme,
@@ -53,7 +51,6 @@ func newBearerTokenAuth(cfg *Config, logger *zap.Logger) *splunkAuth {
 	return a
 }
 
-// Start of BearerTokenAuth does nothing and returns nil
 func (b *splunkAuth) Start(_ context.Context, _ component.Host) error {
 	return nil
 }
@@ -66,17 +63,12 @@ func (b *splunkAuth) setAuthorizationValues(tokens []HecTokenConfig) {
 		} else {
 			values[i] = token
 		}
+		values[i].AllowedIndexes = token.AllowedIndexes
+		values[i].DefaultIndex = token.DefaultIndex
 	}
-	b.authorizationValuesAtomic.Store(values)
+	b.tokens = values
 }
 
-// authorizationValues returns the Authorization header/metadata values
-// to set for client auth, and expected values for server auth.
-func (b *splunkAuth) authorizationValues() []HecTokenConfig {
-	return b.authorizationValuesAtomic.Load().([]HecTokenConfig)
-}
-
-// Shutdown of BearerTokenAuth does nothing and returns nil
 func (b *splunkAuth) Shutdown(_ context.Context) error {
 	if b.filename == "" {
 		return nil
@@ -91,7 +83,6 @@ func (b *splunkAuth) Shutdown(_ context.Context) error {
 	return nil
 }
 
-// Authenticate checks whether the given context contains valid auth data. Validates tokens from clients trying to access the service (incoming requests)
 func (b *splunkAuth) Authenticate(ctx context.Context, headers map[string][]string) (context.Context, error) {
 	auth, ok := headers[strings.ToLower(b.header)]
 	if !ok {
@@ -101,7 +92,7 @@ func (b *splunkAuth) Authenticate(ctx context.Context, headers map[string][]stri
 		return ctx, fmt.Errorf("missing or empty authorization header: %s", b.header)
 	}
 	token := auth[0] // Extract token from authorization header
-	expectedTokens := b.authorizationValues()
+	expectedTokens := b.tokens
 	for _, expectedToken := range expectedTokens {
 		if subtle.ConstantTimeCompare([]byte(expectedToken.Token), []byte(token)) == 1 {
 			return context.WithValue(ctx, ContextKey, expectedToken), nil // Authentication successful, token is valid

@@ -10,7 +10,6 @@ import (
 	"go.opentelemetry.io/collector/extension"
 )
 
-// NewFactory creates a factory for the static bearer token Authenticator extension.
 func NewFactory() extension.Factory {
 	return extension.NewFactory(
 		component.MustNewType("splunkauth"),
@@ -25,5 +24,5 @@ func createDefaultConfig() component.Config {
 }
 
 func createExtension(_ context.Context, set extension.Settings, cfg component.Config) (extension.Extension, error) {
-	return newBearerTokenAuth(cfg.(*Config), set.Logger), nil
+	return newSplunkAuth(cfg.(*Config), set.Logger), nil
 }

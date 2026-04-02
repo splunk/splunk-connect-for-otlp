@@ -33,6 +33,32 @@ const ContextKey = splunkauthextension.ContextKey
 
 type HecTokenConfig = splunkauthextension.HecTokenConfig
 
+func readTokens(f feed) []HecTokenConfig {
+	tokens := make([]HecTokenConfig, len(f.Entry))
+	for i, entry := range f.Entry {
+		var token configopaque.String
+		var defaultIndex string
+		var indexes []string
+		for _, key := range entry.Content.Dict.Key {
+			if key.Name == "token" {
+				token = configopaque.String(key.Text)
+			}
+			if key.Name == "index" {
+				defaultIndex = key.Text
+			}
+			if key.Name == "indexes" {
+				indexes = append(indexes, key.List.Item...)
+			}
+		}
+		tokens[i] = splunkauthextension.HecTokenConfig{
+			Token:          token,
+			DefaultIndex:   defaultIndex,
+			AllowedIndexes: indexes,
+		}
+	}
+	return tokens
+}
+
 func New(ctx context.Context, settings component.TelemetrySettings, serverURI, sessionKey string) (extension.Extension, error) {
 	req, err := http.NewRequest(http.MethodGet, fmt.Sprintf("%s/servicesNS/-/-/data/inputs/http", serverURI), nil)
 	if err != nil {
@@ -61,28 +87,7 @@ func New(ctx context.Context, settings component.TelemetrySettings, serverURI, s
 		return nil, err
 	}
 
-	tokens := make([]splunkauthextension.HecTokenConfig, len(f.Entry))
-	for i, entry := range f.Entry {
-		var token configopaque.String
-		var defaultIndex string
-		var indexes []string
-		for _, key := range entry.Content.Dict.Key {
-			if key.Name == "token" {
-				token = configopaque.String(key.Text)
-			}
-			if key.Name == "index" {
-				defaultIndex = key.Text
-			}
-			if key.Name == "indexes" {
-				indexes = append(indexes, key.List.Item...)
-			}
-		}
-		tokens[i] = splunkauthextension.HecTokenConfig{
-			Token:          token,
-			DefaultIndex:   defaultIndex,
-			AllowedIndexes: indexes,
-		}
-	}
+	tokens := readTokens(f)
 
 	sae := splunkauthextension.NewFactory()
 	authConfig := sae.CreateDefaultConfig().(*splunkauthextension.Config)

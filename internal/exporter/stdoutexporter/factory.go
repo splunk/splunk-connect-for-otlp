@@ -5,9 +5,7 @@ package stdoutexporter
 
 import (
 	"go.opentelemetry.io/collector/component"
-	"go.opentelemetry.io/collector/config/configoptional"
 	"go.opentelemetry.io/collector/exporter"
-	"go.opentelemetry.io/collector/exporter/exporterhelper"
 )
 
 // This file implements factory for stdout exporter.
@@ -30,7 +28,5 @@ func NewFactory() exporter.Factory {
 
 // CreateDefaultConfig creates the default configuration for stdout exporter.
 func createDefaultConfig() component.Config {
-	return &Config{
-		QueueBatchConfig: configoptional.Some(exporterhelper.NewDefaultQueueConfig()),
-	}
+	return &Config{}
 }

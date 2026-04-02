@@ -24,7 +24,6 @@ func BenchmarkStdoutExporter(b *testing.B) {
 
 	settings := exportertest.NewNopSettings(exportertest.NopType)
 	cfg := createDefaultConfig().(*Config)
-	cfg.QueueBatchConfig.GetOrInsertDefault().QueueSize = 1e6 // Set to a large value so sending queue doesn't get full
 	ctx := context.Background()
 
 	tests := []struct {
