@@ -6,7 +6,6 @@ package splunkauthextension
 import (
 	"context"
 	"crypto/subtle"
-	"errors"
 	"fmt"
 	"strings"
 
@@ -28,12 +27,10 @@ type Key string
 const ContextKey Key = "hec"
 
 type splunkAuth struct {
-	shutdownCH chan struct{}
-	logger     *zap.Logger
-	header     string
-	scheme     string
-	filename   string
-	tokens     []HecTokenConfig
+	logger *zap.Logger
+	header string
+	scheme string
+	tokens []HecTokenConfig
 }
 
 const (
@@ -70,16 +67,6 @@ func (b *splunkAuth) setAuthorizationValues(tokens []HecTokenConfig) {
 }
 
 func (b *splunkAuth) Shutdown(_ context.Context) error {
-	if b.filename == "" {
-		return nil
-	}
-
-	if b.shutdownCH == nil {
-		return errors.New("bearerToken file monitoring is not running")
-	}
-	b.shutdownCH <- struct{}{}
-	close(b.shutdownCH)
-	b.shutdownCH = nil
 	return nil
 }
 
