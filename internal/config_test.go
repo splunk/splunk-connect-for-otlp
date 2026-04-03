@@ -23,7 +23,6 @@ func TestParseInput(t *testing.T) {
       <param name="grpc_port">4317</param>
       <param name="host">$decideOnStartup</param>
       <param name="http_port">4318</param>
-      <param name="index">main</param>
       <param name="listen_address">0.0.0.0</param>
       <param name="sourcetype">_splunk-connect-for-otlp</param>
       <param name="start_by_shell">false</param>
@@ -36,14 +35,12 @@ func TestParseInput(t *testing.T) {
 	require.NoError(t, err)
 
 	require.Equal(t, "splunk-connect-for-otlp://specialmind", config.Configuration.Stanza.Name)
-	require.Equal(t, "main", config.Configuration.Stanza.Params[3].Value)
 
-	grpcPort, httpPort, listeningAddress, index, source, sourcetype, serverURI, sessionKey := config.Extract()
+	grpcPort, httpPort, listeningAddress, source, sourcetype, serverURI, sessionKey := config.Extract()
 
 	require.Equal(t, 4317, grpcPort)
 	require.Equal(t, "0.0.0.0", listeningAddress)
 	require.Equal(t, 4318, httpPort)
-	require.Equal(t, "main", index)
 	require.Equal(t, "", source)
 	require.Equal(t, "_splunk-connect-for-otlp", sourcetype)
 	require.Equal(t, "https://127.0.0.1:8089", serverURI)

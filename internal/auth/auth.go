@@ -22,11 +22,42 @@ import (
 	"io"
 	"net/http"
 
-	"github.com/open-telemetry/opentelemetry-collector-contrib/extension/bearertokenauthextension"
+	"github.com/splunk/otlp2splunk/internal/auth/splunkauthextension"
+
 	"go.opentelemetry.io/collector/component"
 	"go.opentelemetry.io/collector/config/configopaque"
 	"go.opentelemetry.io/collector/extension"
 )
+
+const ContextKey = splunkauthextension.ContextKey
+
+type HecTokenConfig = splunkauthextension.HecTokenConfig
+
+func readTokens(f feed) []HecTokenConfig {
+	tokens := make([]HecTokenConfig, len(f.Entry))
+	for i, entry := range f.Entry {
+		var token configopaque.String
+		var defaultIndex string
+		var indexes []string
+		for _, key := range entry.Content.Dict.Key {
+			if key.Name == "token" {
+				token = configopaque.String(key.Text)
+			}
+			if key.Name == "index" {
+				defaultIndex = key.Text
+			}
+			if key.Name == "indexes" {
+				indexes = append(indexes, key.List.Item...)
+			}
+		}
+		tokens[i] = splunkauthextension.HecTokenConfig{
+			Token:          token,
+			DefaultIndex:   defaultIndex,
+			AllowedIndexes: indexes,
+		}
+	}
+	return tokens
+}
 
 func New(ctx context.Context, settings component.TelemetrySettings, serverURI, sessionKey string) (extension.Extension, error) {
 	req, err := http.NewRequest(http.MethodGet, fmt.Sprintf("%s/servicesNS/-/-/data/inputs/http", serverURI), nil)
@@ -56,22 +87,14 @@ func New(ctx context.Context, settings component.TelemetrySettings, serverURI, s
 		return nil, err
 	}
 
-	tokens := make([]configopaque.String, len(f.Entry))
-	for i, entry := range f.Entry {
-		for _, key := range entry.Content.Dict.Key {
-			if key.Name == "token" {
-				tokens[i] = configopaque.String(key.Text)
-			}
-		}
-	}
+	tokens := readTokens(f)
 
-	btae := bearertokenauthextension.NewFactory()
-	authConfig := btae.CreateDefaultConfig().(*bearertokenauthextension.Config)
+	sae := splunkauthextension.NewFactory()
+	authConfig := sae.CreateDefaultConfig().(*splunkauthextension.Config)
 	authConfig.Tokens = tokens
-	authConfig.Scheme = "Splunk"
 
-	return btae.Create(ctx, extension.Settings{
-		ID:                component.MustNewID("bearertokenauth"),
+	return sae.Create(ctx, extension.Settings{
+		ID:                component.MustNewID("splunkauth"),
 		TelemetrySettings: settings,
 	}, authConfig)
 }
@@ -126,8 +149,8 @@ type feed struct {
 				Text string `xml:",chardata"`
 				Key  []struct {
 					List struct {
-						Text string `xml:",chardata"`
-						Item string `xml:"item"`
+						Text string   `xml:",chardata"`
+						Item []string `xml:"item"`
 					} `xml:"list"`
 					Text string `xml:",chardata"`
 					Name string `xml:"name,attr"`

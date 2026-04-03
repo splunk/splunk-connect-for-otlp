@@ -121,9 +121,12 @@
                 <s:key name="eai:appName">splunk_httpinput</s:key>
                 <s:key name="eai:userName">nobody</s:key>
                 <s:key name="host">$decideOnStartup</s:key>
-                <s:key name="index">default</s:key>
+                <s:key name="index">foo</s:key>
                 <s:key name="indexes">
-                    <s:list/>
+                    <s:list>
+                        <s:item>main</s:item>
+                        <s:item>foo</s:item>
+                    </s:list>
                 </s:key>
                 <s:key name="token">00000000-0000-0000-0000-0000000000000</s:key>
             </s:dict>

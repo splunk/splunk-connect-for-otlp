@@ -4,9 +4,12 @@
 package stdoutexporter
 
 import (
+	"context"
 	"encoding/hex"
 	"os"
 	"testing"
+
+	"github.com/splunk/otlp2splunk/internal/auth"
 
 	"github.com/splunk/otlp2splunk/internal/testutils"
 	"go.opentelemetry.io/collector/component/componenttest"
@@ -113,10 +116,16 @@ func logsTest(t *testing.T, test testCfg) {
 
 	exporter, err := newLogsExporter(t.Context(), settings, createDefaultConfig())
 	require.NoError(t, err)
+
 	err = exporter.Start(t.Context(), componenttest.NewNopHost())
 	require.NoError(t, err)
 	out := testutils.CaptureStdout(t, func() {
-		err = exporter.ConsumeLogs(t.Context(), logs)
+		err = exporter.ConsumeLogs(context.WithValue(t.Context(), auth.ContextKey, auth.HecTokenConfig{
+			AllowedIndexes: []string{
+				"main",
+				test.config.index,
+			},
+		}), logs)
 	})
 
 	require.NotEmpty(t, out)
@@ -136,7 +145,12 @@ func metricsTest(t *testing.T, test testCfg) {
 	require.NoError(t, err)
 
 	out := testutils.CaptureStdout(t, func() {
-		err = exporter.ConsumeMetrics(t.Context(), metricData)
+		err = exporter.ConsumeMetrics(context.WithValue(t.Context(), auth.ContextKey, auth.HecTokenConfig{
+			AllowedIndexes: []string{
+				"main",
+				test.config.index,
+			},
+		}), metricData)
 	})
 	require.NotEmpty(t, out)
 	require.NoError(t, err, "Must not error while sending metric data")
@@ -155,7 +169,12 @@ func tracesTest(t *testing.T, test testCfg) {
 	require.NoError(t, err)
 
 	out := testutils.CaptureStdout(t, func() {
-		err = exporter.ConsumeTraces(t.Context(), tracesData)
+		err = exporter.ConsumeTraces(context.WithValue(t.Context(), auth.ContextKey, auth.HecTokenConfig{
+			AllowedIndexes: []string{
+				"main",
+				test.config.index,
+			},
+		}), tracesData)
 	})
 	require.NotEmpty(t, out)
 	require.NoError(t, err, "Must not error while sending trace data")
@@ -261,4 +280,77 @@ func initSpan(name string, ts pcommon.Timestamp, span ptrace.Span) {
 	spanEvent.Attributes().PutStr("foo", "bar")
 	spanEvent.SetName("myEvent")
 	spanEvent.SetTimestamp(ts + 3)
+}
+
+func TestBadIndexLogs(t *testing.T) {
+	logs := prepareLogsNonDefaultParams("foo", "", "", "event")
+	settings := exportertest.NewNopSettings(exportertest.NopType)
+
+	exporter, err := newLogsExporter(t.Context(), settings, createDefaultConfig())
+	require.NoError(t, err)
+
+	err = exporter.Start(t.Context(), componenttest.NewNopHost())
+	require.NoError(t, err)
+	err = exporter.ConsumeLogs(context.WithValue(t.Context(), auth.ContextKey, auth.HecTokenConfig{
+		AllowedIndexes: []string{
+			"main",
+		},
+	}), logs)
+
+	require.EqualError(t, err, `index "foo" is not allowed`)
+}
+
+func TestBadIndexMetrics(t *testing.T) {
+	m := prepareMetricsData("foo")
+	m.ResourceMetrics().At(0).Resource().Attributes().PutStr("com.splunk.index", "foo")
+	settings := exportertest.NewNopSettings(exportertest.NopType)
+
+	exporter, err := newMetricsExporter(t.Context(), settings, createDefaultConfig())
+	require.NoError(t, err)
+
+	err = exporter.Start(t.Context(), componenttest.NewNopHost())
+	require.NoError(t, err)
+	err = exporter.ConsumeMetrics(context.WithValue(t.Context(), auth.ContextKey, auth.HecTokenConfig{
+		AllowedIndexes: []string{
+			"main",
+		},
+	}), m)
+
+	require.EqualError(t, err, `index "foo" is not allowed`)
+}
+
+func TestBadIndexTraces(t *testing.T) {
+	td := prepareTracesData("bar", "", "")
+	settings := exportertest.NewNopSettings(exportertest.NopType)
+
+	exporter, err := newTracesExporter(t.Context(), settings, createDefaultConfig())
+	require.NoError(t, err)
+
+	err = exporter.Start(t.Context(), componenttest.NewNopHost())
+	require.NoError(t, err)
+	err = exporter.ConsumeTraces(context.WithValue(t.Context(), auth.ContextKey, auth.HecTokenConfig{
+		AllowedIndexes: []string{
+			"main",
+		},
+	}), td)
+
+	require.EqualError(t, err, `index "bar" is not allowed`)
+}
+
+func TestBadIndexTracesResource(t *testing.T) {
+	td := prepareTracesData("foo", "", "")
+	settings := exportertest.NewNopSettings(exportertest.NopType)
+
+	exporter, err := newTracesExporter(t.Context(), settings, createDefaultConfig())
+	require.NoError(t, err)
+
+	err = exporter.Start(t.Context(), componenttest.NewNopHost())
+	require.NoError(t, err)
+	err = exporter.ConsumeTraces(context.WithValue(t.Context(), auth.ContextKey, auth.HecTokenConfig{
+		AllowedIndexes: []string{
+			"main",
+		},
+	}), td)
+
+	require.EqualError(t, err, `index "foo" is not allowed`)
 }
