@@ -6,6 +6,7 @@ package testutils
 import (
 	"bufio"
 	"bytes"
+	"crypto/tls"
 	"fmt"
 	"io"
 	"net"
@@ -15,6 +16,8 @@ import (
 	"strings"
 	"testing"
 	"time"
+
+	"github.com/stretchr/testify/require"
 
 	"go.opentelemetry.io/collector/pdata/plog"
 	"go.opentelemetry.io/collector/pdata/pmetric"
@@ -225,10 +228,13 @@ func GetFreePort(t *testing.T) int {
 }
 
 // PostOTLP sends the provided data to the endpoint, retrying until success or timeout.
-func PostOTLP(t *testing.T, port int, path string, body []byte) {
+func PostOTLP(t *testing.T, port int, path string, body []byte, ssl bool) {
 	t.Helper()
 
 	url := fmt.Sprintf("http://127.0.0.1:%d%s", port, path)
+	if ssl {
+		url = fmt.Sprintf("https://127.0.0.1:%d%s", port, path)
+	}
 	deadline := time.Now().Add(defaultTimeout)
 
 	lastRespCode := 0
@@ -236,13 +242,27 @@ func PostOTLP(t *testing.T, port int, path string, body []byte) {
 		req, _ := http.NewRequest(http.MethodPost, url, bytes.NewReader(body))
 		req.Header.Set("Content-Type", "application/json")
 		req.Header.Set("Authorization", "Splunk 00000000-0000-0000-0000-0000000000000")
-		resp, err := http.DefaultClient.Do(req)
+		var client *http.Client
+		if ssl {
+			client = &http.Client{
+				Transport: &http.Transport{
+					TLSClientConfig: &tls.Config{
+						InsecureSkipVerify: true,
+					},
+				},
+			}
+		} else {
+			client = http.DefaultClient
+		}
+		resp, err := client.Do(req)
 		if err == nil {
 			lastRespCode = resp.StatusCode
 			_ = resp.Body.Close()
 			if resp.StatusCode == http.StatusOK {
 				return
 			}
+		} else {
+			require.NoError(t, err)
 		}
 
 		if time.Now().After(deadline) {

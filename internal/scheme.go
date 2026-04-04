@@ -35,6 +35,21 @@ const Scheme = `
                 <required_on_create>false</required_on_create>
             </arg>
 
+            <arg name="enableSSL">
+                <title>Enable SSL</title>
+                <description>Secure traffic by changing the protocol from HTTP to HTTPS, requires a certificate</description>
+            </arg>
+
+            <arg name="serverCert">
+                <title>Server certificate</title>
+                <description>File location of SSL certificate to secure connections</description>
+            </arg>
+
+            <arg name="serverKey">
+                <title>Server key</title>
+                <description>File location of SSL key to secure connections</description>
+            </arg>
+
         </args>
     </endpoint>
 </scheme>`

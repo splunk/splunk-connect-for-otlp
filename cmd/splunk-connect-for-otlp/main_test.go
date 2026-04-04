@@ -13,6 +13,8 @@ import (
 	"testing"
 	"time"
 
+	"github.com/stretchr/testify/assert"
+
 	"github.com/splunk/otlp2splunk/internal/auth/test"
 
 	"github.com/splunk/otlp2splunk/internal"
@@ -82,6 +84,8 @@ func TestExpectedHEC(t *testing.T) {
 	listener, err := net.Listen("tcp", "127.0.0.1:0")
 	require.NoError(t, err)
 	test.SetupAuth(listener, t)
+	serverCert := filepath.Join("testdata", "cert.pem")
+	serverKey := filepath.Join("testdata", "key.pem")
 
 	tests := []struct {
 		name         string
@@ -129,40 +133,60 @@ func TestExpectedHEC(t *testing.T) {
 
 	for _, tt := range tests {
 		tt := tt
-		t.Run(tt.name, func(t *testing.T) {
-			grpcPort := testutils.GetFreePort(t)
-			httpPort := testutils.GetFreePort(t)
-
-			config := fmt.Sprintf(`<input>
+		for _, ssl := range []bool{true, false} {
+			name := tt.name
+			if ssl {
+				name += "-ssl"
+			}
+			t.Run(name, func(t *testing.T) {
+				grpcPort := testutils.GetFreePort(t)
+				httpPort := testutils.GetFreePort(t)
+				config := fmt.Sprintf(`<input>
   <server_uri>http://%s</server_uri>
   <session_key>mysessionkey</session_key>
-<configuration><stanza name="splunk-connect-for-otlp://test" app="search"><param name="grpc_port">%d</param><param name="http_port">%d</param><param name="listen_address">127.0.0.1</param></stanza></configuration></input>`, listener.Addr().String(), grpcPort, httpPort)
+<configuration><stanza name="splunk-connect-for-otlp://test" app="search">
+<param name="grpc_port">%d</param>
+<param name="http_port">%d</param>
+<param name="enableSSL">%v</param>
+<param name="serverCert">%s</param>
+<param name="serverKey">%s</param>
+<param name="listen_address">127.0.0.1</param>
+</stanza></configuration></input>`, listener.Addr().String(), grpcPort, httpPort, ssl, serverCert, serverKey)
 
-			restoreStdin := testutils.WriteToStdin(t, config)
-			t.Cleanup(restoreStdin)
+				restoreStdin := testutils.WriteToStdin(t, config)
+				t.Cleanup(restoreStdin)
 
-			stdoutLines, restoreStdout := testutils.CaptureStdoutLines(t)
-			t.Cleanup(restoreStdout)
+				stdoutLines, restoreStdout := testutils.CaptureStdoutLines(t)
+				t.Cleanup(restoreStdout)
 
-			runDone := make(chan error, 1)
-			go func() {
-				runDone <- run()
-			}()
+				runDone := make(chan error, 1)
+				go func() {
+					err := run()
+					require.NoError(t, err)
+					runDone <- err
+				}()
+				// wait until the receiver is up.
+				require.EventuallyWithT(t, func(tt *assert.CollectT) {
+					conn, err := net.DialTimeout("tcp", fmt.Sprintf("127.0.0.1:%d", httpPort), 100*time.Millisecond)
+					require.NoError(tt, err)
+					_ = conn.Close()
+				}, 5*time.Second, 200*time.Millisecond)
 
-			payload, err := os.ReadFile(tt.inputPath)
-			require.NoError(t, err)
+				payload, err := os.ReadFile(tt.inputPath)
+				require.NoError(t, err)
 
-			expected := testutils.LoadExpectedHecData(t, tt.expectedPath)
-			expectedLines := strings.Split(strings.TrimSpace(string(expected)), "\n")
-			require.NotEmpty(t, expectedLines, "%s must contain fixture data", tt.expectedPath)
+				expected := testutils.LoadExpectedHecData(t, tt.expectedPath)
+				expectedLines := strings.Split(strings.TrimSpace(string(expected)), "\n")
+				require.NotEmpty(t, expectedLines, "%s must contain fixture data", tt.expectedPath)
 
-			testutils.PostOTLP(t, httpPort, tt.otlpendpoint, payload)
+				testutils.PostOTLP(t, httpPort, tt.otlpendpoint, payload, ssl)
 
-			actual := testutils.CollectLines(t, stdoutLines, len(expectedLines))
-			require.Equal(t, expectedLines, actual)
+				actual := testutils.CollectLines(t, stdoutLines, len(expectedLines))
+				require.Equal(t, expectedLines, actual)
 
-			require.NoError(t, syscall.Kill(os.Getpid(), syscall.SIGTERM))
-			require.NoError(t, <-runDone)
-		})
+				require.NoError(t, syscall.Kill(os.Getpid(), syscall.SIGTERM))
+				require.NoError(t, <-runDone)
+			})
+		}
 	}
 }
