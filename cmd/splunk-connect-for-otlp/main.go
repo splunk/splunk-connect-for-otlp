@@ -68,10 +68,10 @@ func run() error {
 		Resource:       pcommon.NewResource(),
 	}
 
-	grpcPort, httpPort, listeningAddress, source, sourcetype, serverURI, sessionKey, enableSSL, serverCert, serverKey := config.Extract()
+	xmlCfg := config.Extract()
 	stdoutCfg := stdoutexporter.NewFactory().CreateDefaultConfig().(*stdoutexporter.Config)
-	stdoutCfg.Source = source
-	stdoutCfg.Sourcetype = sourcetype
+	stdoutCfg.Source = xmlCfg.Source
+	stdoutCfg.Sourcetype = xmlCfg.Sourcetype
 
 	f := stdoutexporter.NewFactory()
 	ctx := context.Background()
@@ -95,17 +95,17 @@ func run() error {
 
 	rf := otlpreceiver.NewFactory()
 	cfg := rf.CreateDefaultConfig().(*otlpreceiver.Config)
-	cfg.GRPC.GetOrInsertDefault().NetAddr.Endpoint = fmt.Sprintf("%s:%d", listeningAddress, grpcPort)
-	cfg.HTTP.GetOrInsertDefault().ServerConfig.NetAddr.Endpoint = fmt.Sprintf("%s:%d", listeningAddress, httpPort)
+	cfg.GRPC.GetOrInsertDefault().NetAddr.Endpoint = fmt.Sprintf("%s:%d", xmlCfg.ListenAddress, xmlCfg.GrpcPort)
+	cfg.HTTP.GetOrInsertDefault().ServerConfig.NetAddr.Endpoint = fmt.Sprintf("%s:%d", xmlCfg.ListenAddress, xmlCfg.HTTPPort)
 	extID := component.MustNewID("splunkauth")
 	cfg.GRPC.Get().Auth.GetOrInsertDefault().AuthenticatorID = extID
 	cfg.HTTP.Get().ServerConfig.Auth.GetOrInsertDefault().AuthenticatorID = extID
 
-	if enableSSL {
-		cfg.GRPC.Get().TLS.GetOrInsertDefault().CertFile = serverCert
-		cfg.HTTP.Get().ServerConfig.TLS.GetOrInsertDefault().CertFile = serverCert
-		cfg.GRPC.Get().TLS.GetOrInsertDefault().KeyFile = serverKey
-		cfg.HTTP.Get().ServerConfig.TLS.GetOrInsertDefault().KeyFile = serverKey
+	if xmlCfg.EnableSSL {
+		cfg.GRPC.Get().TLS.GetOrInsertDefault().CertFile = xmlCfg.ServerCert
+		cfg.HTTP.Get().ServerConfig.TLS.GetOrInsertDefault().CertFile = xmlCfg.ServerCert
+		cfg.GRPC.Get().TLS.GetOrInsertDefault().KeyFile = xmlCfg.ServerKey
+		cfg.HTTP.Get().ServerConfig.TLS.GetOrInsertDefault().KeyFile = xmlCfg.ServerKey
 	}
 
 	otlpSettings := receiver.Settings{
@@ -125,7 +125,7 @@ func run() error {
 
 	logger.Info("Configured OTLP receiver")
 
-	auth, err := auth.New(ctx, settings, serverURI, sessionKey)
+	auth, err := auth.New(ctx, settings, xmlCfg.ServerURI, xmlCfg.SessionKey)
 	if err != nil {
 		return err
 	}

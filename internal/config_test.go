@@ -39,16 +39,16 @@ func TestParseInput(t *testing.T) {
 
 	require.Equal(t, "splunk-connect-for-otlp://specialmind", config.Configuration.Stanza.Name)
 
-	grpcPort, httpPort, listeningAddress, source, sourcetype, serverURI, sessionKey, enableSSL, serverCert, serverKey := config.Extract()
+	xmlCfg := config.Extract()
 
-	require.Equal(t, 4317, grpcPort)
-	require.Equal(t, "0.0.0.0", listeningAddress)
-	require.Equal(t, 4318, httpPort)
-	require.Equal(t, "", source)
-	require.Equal(t, "_splunk-connect-for-otlp", sourcetype)
-	require.Equal(t, "https://127.0.0.1:8089", serverURI)
-	require.Equal(t, "OwLHq7jpfgz0WLe5t8KwZuxT4QZRggryMB2io6Phimb2zi5ErifFvx0Eu8WTmfviO^KUKEA8CsGbVltVlCDlYOBM0RE8QoOjOHZhKnHsphk20XoqaK1KXTZj1N", sessionKey)
-	require.True(t, enableSSL)
-	require.Equal(t, "/var/certs/server.cert", serverCert)
-	require.Equal(t, "/var/certs/server.key", serverKey)
+	require.Equal(t, 4317, xmlCfg.GrpcPort)
+	require.Equal(t, "0.0.0.0", xmlCfg.ListenAddress)
+	require.Equal(t, 4318, xmlCfg.HTTPPort)
+	require.Equal(t, "", xmlCfg.Source)
+	require.Equal(t, "_splunk-connect-for-otlp", xmlCfg.Sourcetype)
+	require.Equal(t, "https://127.0.0.1:8089", xmlCfg.ServerURI)
+	require.Equal(t, "OwLHq7jpfgz0WLe5t8KwZuxT4QZRggryMB2io6Phimb2zi5ErifFvx0Eu8WTmfviO^KUKEA8CsGbVltVlCDlYOBM0RE8QoOjOHZhKnHsphk20XoqaK1KXTZj1N", xmlCfg.SessionKey)
+	require.True(t, xmlCfg.EnableSSL)
+	require.Equal(t, "/var/certs/server.cert", xmlCfg.ServerCert)
+	require.Equal(t, "/var/certs/server.key", xmlCfg.ServerKey)
 }
