@@ -7,7 +7,7 @@ require (
 	github.com/open-telemetry/opentelemetry-collector-contrib/pkg/translator/splunk v0.149.0
 	github.com/stretchr/testify v1.11.1
 	go.opentelemetry.io/collector/component v1.55.0
-	go.opentelemetry.io/collector/component/componentstatus v0.149.0
+	go.opentelemetry.io/collector/component/componentstatus v0.150.0
 	go.opentelemetry.io/collector/component/componenttest v0.149.0
 	go.opentelemetry.io/collector/config/configopaque v1.55.0
 	go.opentelemetry.io/collector/consumer v1.55.0
