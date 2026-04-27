@@ -15,11 +15,11 @@ splunk-connect-for-otlp.tgz: tgz
 
 ta/splunk-connect-for-otlp/linux_x86_64/bin/splunk-connect-for-otlp: $(shell find  **/*.go -type f)
 	mkdir -p ../../ta/splunk-connect-for-otlp/linux_x86_64/bin
-	GOOS=linux GOARCH=amd64 go build -C cmd/splunk-connect-for-otlp -trimpath -o ../../ta/splunk-connect-for-otlp/linux_x86_64/bin/splunk-connect-for-otlp .
+	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -C cmd/splunk-connect-for-otlp -trimpath -o ../../ta/splunk-connect-for-otlp/linux_x86_64/bin/splunk-connect-for-otlp .
 
 ta/splunk-connect-for-otlp/windows_x86_64/bin/splunk-connect-for-otlp: $(shell find  **/*.go -type f)
 	mkdir -p ../../ta/splunk-connect-for-otlp/windows_x86_64/bin
-	GOOS=windows GOARCH=amd64 go build -C cmd/splunk-connect-for-otlp -trimpath -o ../../ta/splunk-connect-for-otlp/windows_x86_64/bin/splunk-connect-for-otlp .
+	CGO_ENABLED=0 GOOS=windows GOARCH=amd64 go build -C cmd/splunk-connect-for-otlp -trimpath -o ../../ta/splunk-connect-for-otlp/windows_x86_64/bin/splunk-connect-for-otlp .
 
 .PHONY := build
 build: ta/splunk-connect-for-otlp/linux_x86_64/bin/splunk-connect-for-otlp ta/splunk-connect-for-otlp/windows_x86_64/bin/splunk-connect-for-otlp
