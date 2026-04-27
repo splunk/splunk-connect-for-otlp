@@ -38,28 +38,23 @@
                     <key name="exampleText">0.0.0.0</key>
                     <key name="helpText">The listening address to bind the receiver to</key>
                 </element>
-            </elements>
-        </element>
-
-        <element name="indexField" type="fieldset">
-            <key name="legend">Configuration</key>
-            <view name="list"/>
-            <view name="edit"/>
-            <view name="create"/>
-            <elements>
-                <element name="source" label="Source">
+                <element name="enableSSL" label="Enable SSL" required="false">
                     <view name="list"/>
                     <view name="edit"/>
                     <view name="create"/>
-                    <key name="exampleText">/var/log/syslog</key>
-                    <key name="helpText">Default source</key>
+                    <key name="helpText">Secure traffic by changing the protocol from HTTP to HTTPS, requires a certificate</key>
                 </element>
-                <element name="sourcetype" label="Source Type">
-                    <view name="list"/>
+
+                <element name="serverCert" label="Server Certificate" required="false">
                     <view name="edit"/>
                     <view name="create"/>
-                    <key name="exampleText">_json</key>
-                    <key name="helpText">Default source type</key>
+                    <key name="helpText">File location of SSL certificate to secure connections</key>
+                </element>
+
+                <element name="serverKey" label="Server Key" required="false">
+                    <view name="edit"/>
+                    <view name="create"/>
+                    <key name="helpText">File location of SSL key to secure connections</key>
                 </element>
             </elements>
         </element>
