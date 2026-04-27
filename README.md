@@ -50,6 +50,37 @@ All other resource and individual log record attributes are mapped to indexed fi
 
 This mapping follows the OpenTelemetry specification.
 
+
+### Example
+
+Here is a collector configuration, reading logs from a file, sending OTLP data to a specific index `mylogs`:
+
+```yaml
+receivers:
+    filelog/output:
+      include: [ /output/file.log ]
+
+exporters:
+    otlphttp:
+      endpoint: "http://splunk:4318"
+      headers:
+        authorization: "Splunk 00000000-0000-0000-0000-0000000000000"
+
+processors:
+    resource:
+        attributes:
+          - key: com.splunk.index
+            value: "mylogs"
+            action: insert
+
+service:
+    pipelines:
+      logs:
+        receivers: [filelog/output]
+        processors: [resource]
+        exporters: [otlphttp]
+```
+
 ## Build
 
 Prerequisites:
