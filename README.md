@@ -18,7 +18,7 @@ Create a new OTLP input in the data inputs.
 
 Configure the OTLP input ports, network interface and index.
 
-![Setup](docs/data_input_setup.webp)
+![Setup](docs/data_input_setup.png)
 
 The input is configured as a data input in the Splunk Data Input settings.
 
