@@ -16,7 +16,7 @@ Create a new OTLP input in the data inputs.
 
 ![Picker](docs/data_input_picker.png)
 
-Configure the OTLP input ports, network interface and index.
+Configure the OTLP input ports and network interface.
 
 ![Setup](docs/data_input_setup.png)
 
@@ -26,7 +26,29 @@ You can set:
 * The gRPC port and HTTP ports the OTLP receiver will listen on
 * The network interface address on which the OTLP input will listen.
 
+## HEC Token configuration
+
+The OTLP addon inherits authentication and authorization associated with the HEC tokens defined on the Splunk instance.
+
+The OTLP endpoint requires an 
+
 ## Sending OTLP
+
+### Authentication
+
+The OTLP endpoint is secured by a bearer token authentication, checking the Authorization header for a token under the Splunk scheme.
+
+Example of setup of the `otlp_http` exporter:
+
+```yaml
+exporters:
+    otlp_http:
+      endpoint: "http://splunk:4318"
+      headers:
+        authorization: "Splunk <TOKEN>"
+```
+
+### Attribute to event fields mapping
 
 When sending OTLP data, this input interprets resource attributes to create HEC equivalents.
 
