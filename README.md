@@ -30,13 +30,15 @@ You can set:
 
 The OTLP addon inherits authentication and authorization associated with the HEC tokens defined on the Splunk instance.
 
-The OTLP endpoint requires an 
+Please define a HEC token as documented in [Splunk docs](https://help.splunk.com/en/splunk-enterprise/get-started/get-data-in/9.4/get-data-with-http-event-collector/set-up-and-use-http-event-collector-in-splunk-web).
+
+Please make sure to allow indexes as needed ; any payload sending to indexes that are not allowed will be refused in its entirety.
 
 ## Sending OTLP
 
 ### Authentication
 
-The OTLP endpoint is secured by a bearer token authentication, checking the Authorization header for a token under the Splunk scheme.
+The OTLP endpoint is secured by a bearer token authentication, checking the Authorization header for a token authentication under the Splunk scheme.
 
 Example of setup of the `otlp_http` exporter:
 
