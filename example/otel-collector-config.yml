@@ -1,9 +1,9 @@
 receivers:
-    filelog:
+    file_log:
       include: [ /output/file.log ]
 
 exporters:
-    otlphttp:
+    otlp_http:
       endpoint: "http://splunk:4318"
       headers:
         authorization: "Splunk 00000000-0000-0000-0000-0000000000000"
@@ -21,6 +21,6 @@ processors:
 service:
     pipelines:
       logs:
-        receivers: [filelog]
+        receivers: [file_log]
         processors: [resource]
-        exporters: [otlphttp]
+        exporters: [otlp_http]
