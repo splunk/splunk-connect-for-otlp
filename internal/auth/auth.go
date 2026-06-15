@@ -67,7 +67,7 @@ func New(ctx context.Context, settings component.TelemetrySettings, serverURI, s
 	req.Header.Add("Authorization", fmt.Sprintf("Splunk %s", sessionKey))
 	customTransport := http.DefaultTransport.(*http.Transport).Clone()
 	// Configure the TLS settings to skip certificate verification
-	customTransport.TLSClientConfig = &tls.Config{InsecureSkipVerify: true}
+	customTransport.TLSClientConfig = &tls.Config{}
 	// Create a new http client with the custom transport
 	httpClient := &http.Client{Transport: customTransport}
 	defer httpClient.CloseIdleConnections()
