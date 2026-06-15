@@ -65,7 +65,6 @@ func New(ctx context.Context, settings component.TelemetrySettings, serverURI, s
 	}
 	req.Header.Add("Authorization", fmt.Sprintf("Splunk %s", sessionKey))
 	httpClient := &http.Client{}
-	defer httpClient.CloseIdleConnections()
 	resp, err := httpClient.Do(req)
 	if err != nil {
 		return nil, err
