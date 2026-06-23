@@ -24,7 +24,6 @@ services:
     container_name: splunk
     environment:
       - SPLUNK_START_ARGS=--accept-license
-      - SPLUNK_HEC_TOKEN=00000000-0000-0000-0000-0000000000000
       - SPLUNK_PASSWORD=changeme
     ports:
       - 18000:8000
