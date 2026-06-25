@@ -4,9 +4,14 @@ receivers:
 
 exporters:
     otlp_http:
-      endpoint: "http://splunk:4318"
+      endpoint: "https://splunk:4318"
       headers:
-        authorization: "Splunk 00000000-0000-0000-0000-0000000000000"
+        # Token value is loaded at startup from the secrets volume by the
+        # OTel file provider, keeping credentials out of the config file.
+        authorization: "Splunk ${file:/secrets/hec-token}"
+      tls:
+        # CA that signed the Splunk server certificate
+        ca_file: /certs/ca.crt
 
 processors:
     resource:
