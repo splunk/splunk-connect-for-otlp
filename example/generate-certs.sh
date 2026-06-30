@@ -4,7 +4,7 @@
 #
 # Usage: sh generate-certs.sh [<certs-dir>]   (default: /certs)
 #
-# Security note: private key files are created mode 600 (owner-readable only).
+# Security note: private key files are created mode as readable only (except for owner).
 # In production use Docker Secrets or a secrets manager instead of bind mounts.
 
 set -eu

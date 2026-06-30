@@ -7,8 +7,10 @@ The example runs as a Docker Compose deployment with three services:
 | Service | Role |
 | --- | --- |
 | `cert-init` | One-shot container that generates TLS certificates before any other service starts |
+| `logging` | Writes log files for the collector to read |
 | `otelcollector` | Reads log files and forwards them to Splunk over HTTPS |
 | `splunk` | Splunk Enterprise with the Splunk Connect for OTLP TA, configured for TLS |
+| `token-init` | One-shot container that generates a HEC token for the Splunk TA, before the collector starts |
 
 ## Certificate strategy
 
@@ -18,7 +20,7 @@ The example runs as a Docker Compose deployment with three services:
 - A server certificate for Splunk (`server.crt` / `server.key`)
 - A client certificate for the OTel Collector (`client.crt` / `client.key`)
 
-All files are written to a **named Docker volume** (`certs`). Private keys are created with mode `600` (owner-readable only) and never written to the host filesystem, limiting unintended exposure. In production, replace this with Docker Secrets or a secrets manager.
+All files are written to a **named Docker volume** (`certs`). In production, replace this with Docker Secrets or a secrets manager.
 
 > **Note:** The current TA release supports one-way TLS (server authentication only). Currently, the TA does not verify the collector's client certificate.
 
@@ -40,7 +42,7 @@ Once Splunk is running, visit the [Search app](http://localhost:18000/en-US/app/
 
 ### OTel Collector (`otel-collector-config.yml`)
 
-The `otlphttp` exporter connects to `https://splunk:4318` and verifies the server certificate against the shared CA:
+The `otlp_http` exporter connects to `https://splunk:4318` and verifies the server certificate against the shared CA:
 
 ```yaml
 tls:
@@ -52,7 +54,7 @@ tls:
 The local inputs override enables TLS on the TA listener:
 
 ```ini
-[splunk-connect-for-otlp]
+[splunk-connect-for-otlp://otlp-connector]
 enableSSL  = 1
 serverCert = /certs/server.crt
 serverKey  = /certs/server.key

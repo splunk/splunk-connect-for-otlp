@@ -1,6 +1,6 @@
 services:
-  # One-shot container that generates mTLS certificates before anything else
-  # starts. Uses a named volume so the key files (mode 600) are never written
+  # One-shot container that generates TLS certificates before anything else
+  # starts. Uses a named volume so the key files (mode 600/644) are never written
   # to the host filesystem, reducing the risk of unintended exposure.
   cert-init:
     image: alpine/openssl:latest
@@ -52,7 +52,7 @@ services:
     volumes:
       - ./otel-collector-config.yml:/etc/otel-collector-config.yml:ro
       - ./output:/output
-      # mTLS certs: named volume, private keys mode 600/640, never on the host.
+      # TLS certs: named volume, private keys mode 600/640, never on the host.
       - certs:/certs:ro
       # HEC token written by token-init; mounted read-only.
       - secrets:/secrets:ro

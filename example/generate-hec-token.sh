@@ -1,7 +1,6 @@
 #!/bin/sh
 # Creates a Splunk HEC token via the local management REST API and writes its
-# value to SECRETS_DIR/hec-token. Intended to run inside the Splunk container
-# via a Docker Compose post_start lifecycle hook.
+# value to SECRETS_DIR/hec-token.
 #
 # If the token already exists the existing value is retrieved instead.
 #
