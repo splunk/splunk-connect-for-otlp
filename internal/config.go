@@ -58,7 +58,7 @@ func (x XMLInput) Extract() InputConfig {
 	listeningAddress := DefaultListenAddress
 	source := ""
 	sourcetype := ""
-	enableSSL := false
+	enableSSL := true
 	serverCert := ""
 	serverKey := ""
 
