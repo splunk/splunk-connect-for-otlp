@@ -6,6 +6,7 @@ package internal
 import (
 	"bufio"
 	"encoding/xml"
+	"fmt"
 	"os"
 	"strconv"
 	"strings"
@@ -97,6 +98,13 @@ func (x XMLInput) Extract() InputConfig {
 		ServerCert:    serverCert,
 		ServerKey:     serverKey,
 	}
+}
+
+func (c InputConfig) Validate() error {
+	if c.EnableSSL && (c.ServerCert == "" || c.ServerKey == "") {
+		return fmt.Errorf("enableSSL requires both serverCert and serverKey to be set")
+	}
+	return nil
 }
 
 func convertBool(value string) bool {
