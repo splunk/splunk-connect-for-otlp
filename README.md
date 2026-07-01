@@ -127,6 +127,14 @@ service:
         exporters: [otlphttp]
 ```
 
+### Execution Logs
+
+Use the Splunk query below to see the TA logs on your forwarder:
+
+```splunk
+index="_internal" "splunk-connect-for-otlp" source="/opt/splunk/var/log/splunk/splunkd.log" component="ExecProcessor" | fields event_message
+```
+
 ## Build
 
 Prerequisites:

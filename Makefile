@@ -13,11 +13,11 @@ tgz: build
 
 splunk-connect-for-otlp.tgz: tgz
 
-ta/splunk-connect-for-otlp/linux_x86_64/bin/splunk-connect-for-otlp: $(shell find  **/*.go -type f)
+ta/splunk-connect-for-otlp/linux_x86_64/bin/splunk-connect-for-otlp: $(shell find . -name "*.go" -type f -not -path "./ta/*")
 	mkdir -p ../../ta/splunk-connect-for-otlp/linux_x86_64/bin
 	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -C cmd/splunk-connect-for-otlp -trimpath -o ../../ta/splunk-connect-for-otlp/linux_x86_64/bin/splunk-connect-for-otlp .
 
-ta/splunk-connect-for-otlp/windows_x86_64/bin/splunk-connect-for-otlp: $(shell find  **/*.go -type f)
+ta/splunk-connect-for-otlp/windows_x86_64/bin/splunk-connect-for-otlp: $(shell find . -name "*.go" -type f -not -path "./ta/*")
 	mkdir -p ../../ta/splunk-connect-for-otlp/windows_x86_64/bin
 	CGO_ENABLED=0 GOOS=windows GOARCH=amd64 go build -C cmd/splunk-connect-for-otlp -trimpath -o ../../ta/splunk-connect-for-otlp/windows_x86_64/bin/splunk-connect-for-otlp .
 
@@ -27,6 +27,7 @@ build: ta/splunk-connect-for-otlp/linux_x86_64/bin/splunk-connect-for-otlp ta/sp
 .PHONY := splunk
 splunk: splunk-connect-for-otlp.tgz
 	docker run --rm -it -v $(PWD)/splunk-connect-for-otlp.tgz:/tmp/splunk-connect-for-otlp.tgz \
+		--platform linux/amd64 \
 		-e "SPLUNK_PASSWORD=changeme" \
 		-e "SPLUNK_APPS_URL=file:///tmp/splunk-connect-for-otlp.tgz" \
 		-e "SPLUNK_GENERAL_TERMS=--accept-sgt-current-at-splunk-com" \
