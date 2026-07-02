@@ -69,6 +69,9 @@ func run() error {
 	}
 
 	xmlCfg := config.Extract()
+	if err = xmlCfg.Validate(); err != nil {
+		return fmt.Errorf("cannot start TA due to invalid configuration: %w", err)
+	}
 	stdoutCfg := stdoutexporter.NewFactory().CreateDefaultConfig().(*stdoutexporter.Config)
 	stdoutCfg.Source = xmlCfg.Source
 	stdoutCfg.Sourcetype = xmlCfg.Sourcetype

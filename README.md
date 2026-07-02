@@ -26,6 +26,28 @@ You can set:
 * The gRPC port and HTTP ports the OTLP receiver will listen on
 * The network interface address on which the OTLP input will listen.
 
+### TLS / SSL
+
+SSL is **enabled by default** (`enableSSL = 1`). When enabled, both the gRPC and HTTP listeners require a server certificate and key. The input will fail to start if either is missing.
+
+You must provide:
+
+| Parameter    | Description                                |
+|--------------|--------------------------------------------|
+| `serverCert` | Path to the PEM-encoded server certificate |
+| `serverKey`  | Path to the PEM-encoded server private key |
+
+Example `local/inputs.conf` override:
+
+```ini
+[splunk-connect-for-otlp]
+enableSSL = 1
+serverCert = /path/to/server.crt
+serverKey  = /path/to/server.key
+```
+
+To disable SSL (not recommended for production), set `enableSSL = 0`. See the [example folder](./example) for a full Docker Compose setup with TLS certificates generated automatically.
+
 ## HEC Token configuration
 
 The OTLP addon inherits authentication and authorization associated with the HEC tokens defined on the Splunk instance.
@@ -103,6 +125,14 @@ service:
         receivers: [filelog/output]
         processors: [resource]
         exporters: [otlphttp]
+```
+
+### Execution Logs
+
+Use the Splunk query below to see the TA logs on your forwarder:
+
+```splunk
+index="_internal" "splunk-connect-for-otlp" source="/opt/splunk/var/log/splunk/splunkd.log" component="ExecProcessor" | fields event_message
 ```
 
 ## Build

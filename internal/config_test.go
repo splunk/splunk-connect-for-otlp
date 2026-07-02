@@ -10,6 +10,50 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
+func TestValidate(t *testing.T) {
+	tests := []struct {
+		name    string
+		cfg     InputConfig
+		wantErr bool
+	}{
+		{
+			name:    "SSL disabled no certs",
+			cfg:     InputConfig{EnableSSL: false},
+			wantErr: false,
+		},
+		{
+			name:    "SSL enabled with both cert and key",
+			cfg:     InputConfig{EnableSSL: true, ServerCert: "/certs/server.crt", ServerKey: "/certs/server.key"},
+			wantErr: false,
+		},
+		{
+			name:    "SSL enabled missing cert",
+			cfg:     InputConfig{EnableSSL: true, ServerKey: "/certs/server.key"},
+			wantErr: true,
+		},
+		{
+			name:    "SSL enabled missing key",
+			cfg:     InputConfig{EnableSSL: true, ServerCert: "/certs/server.crt"},
+			wantErr: true,
+		},
+		{
+			name:    "SSL enabled missing both",
+			cfg:     InputConfig{EnableSSL: true},
+			wantErr: true,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			err := tt.cfg.Validate()
+			if tt.wantErr {
+				require.Error(t, err)
+			} else {
+				require.NoError(t, err)
+			}
+		})
+	}
+}
+
 func TestParseInput(t *testing.T) {
 	input := `
 <?xml version="1.0" encoding="UTF-8"?>

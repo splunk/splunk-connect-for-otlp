@@ -43,13 +43,13 @@ const Scheme = `
 
             <arg name="serverCert">
                 <title>Server certificate</title>
-                <description>File location of SSL certificate to secure connections</description>
+                <description>File location of SSL certificate to secure connections, required if SSL is enabled</description>
                 <required_on_create>false</required_on_create>
             </arg>
 
             <arg name="serverKey">
                 <title>Server key</title>
-                <description>File location of SSL key to secure connections</description>
+                <description>File location of SSL key to secure connections, required if SSL is enabled</description>
                 <required_on_create>false</required_on_create>
             </arg>
 

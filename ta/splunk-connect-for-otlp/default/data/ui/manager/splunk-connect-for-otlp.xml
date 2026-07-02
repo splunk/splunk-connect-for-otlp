@@ -47,13 +47,13 @@
                 <element name="serverCert" label="Server Certificate" required="false">
                     <view name="edit"/>
                     <view name="create"/>
-                    <key name="helpText">File location of SSL certificate to secure connections</key>
+                    <key name="helpText">File location of SSL certificate to secure connections, required if SSL is enabled</key>
                 </element>
 
                 <element name="serverKey" label="Server Key" required="false">
                     <view name="edit"/>
                     <view name="create"/>
-                    <key name="helpText">File location of SSL key to secure connections</key>
+                    <key name="helpText">File location of SSL key to secure connections, required if SSL is enabled</key>
                 </element>
             </elements>
         </element>

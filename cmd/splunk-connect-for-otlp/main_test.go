@@ -58,6 +58,7 @@ func TestRunStartsAndStopsOnSignal(t *testing.T) {
     <param name="grpc_port">0</param>
     <param name="http_port">0</param>
     <param name="listen_address">127.0.0.1</param>
+    <param name="enableSSL">0</param>
   </stanza>
 </configuration>
 </input>`, listener.Addr().String()))
