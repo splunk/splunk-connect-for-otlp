@@ -1,3 +1,7 @@
+:warning: This repository is deprecated and its contents are moving under https://github.com/signalfx/splunk-otel-collector/tree/main/packaging/otlpinput, and will be released as part of the Splunk OpenTelemetry Collector release cycle.
+
+This repository will be archived by October 2026.
+
 # Splunk Connect for OTLP
 
 This repository contains a technical addon that exposes a OTLP endpoint for consumption of logs, traces and metrics.
